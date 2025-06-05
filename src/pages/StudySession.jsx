@@ -10,7 +10,8 @@ const StudySession = () => {
   const { deckId } = useParams();
   const navigate = useNavigate();
   const { decks } = useDecks();
-  const { cards, updateCard } = useCards(deckId);
+  const { cards, updateCard, loading } = useCards(deckId);
+  console.log("All cards for this deck:", cards);
   
   const [currentIndex, setCurrentIndex] = useState(0);
   const [sessionCards, setSessionCards] = useState([]);
@@ -27,21 +28,29 @@ const StudySession = () => {
 
   // Initialize session
   useEffect(() => {
-    if (cards.length > 0) {
+    if (!loading && cards.length > 0) {
       const dueCards = getDueCards(cards);
-      const studyCards = dueCards.length > 0 ? dueCards : cards;
-      
-      // Shuffle cards
+      const newCards = cards.filter(card => card.repetitions === 0);
+      const cardMap = {};
+      [...dueCards, ...newCards].forEach(card => {
+        cardMap[card.id] = card;
+      });
+      const studyCards = Object.values(cardMap);
       const shuffled = [...studyCards].sort(() => Math.random() - 0.5);
       setSessionCards(shuffled);
+        console.log("Session cards:", shuffled);
       setSessionStats({
         total: shuffled.length,
         completed: 0,
         correct: 0,
         ratings: { 0: 0, 3: 0, 4: 0, 5: 0 }
       });
+      setCurrentIndex(0);
+      setSessionComplete(false);
+    } else if (!loading) {
+      setSessionCards([]);
     }
-  }, [cards]);
+  }, [deckId, loading]);
 
   const handleRate = (rating) => {
     const currentCard = sessionCards[currentIndex];
@@ -65,10 +74,11 @@ const StudySession = () => {
     
     // Move to next card or complete session
     if (currentIndex < sessionCards.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      setCurrentIndex(idx => idx + 1);
     } else {
       setSessionComplete(true);
     }
+    console.log("Current index:", currentIndex, "Session cards:", sessionCards);
   };
 
   const handleContinue = () => {
@@ -171,6 +181,8 @@ const StudySession = () => {
   // Study session
   const currentCard = sessionCards[currentIndex];
   const progress = ((currentIndex + 1) / sessionCards.length) * 100;
+
+  console.log("Rendering, sessionCards:", sessionCards, "currentIndex:", currentIndex);
 
   return (
     <div className="container mx-auto p-6">

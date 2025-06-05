@@ -12,6 +12,7 @@ import useDecks from '../hooks/useDecks';
 // react, but help with general tasks like data fetching or 
 // local storage management
 import { loadCards } from '../utils/localStorage';
+import { getDueCards } from '../utils/spacedRepetition';
 
 const Dashboard = () => {
     //an array of decks is fetched from the custom hook useDecks
@@ -62,12 +63,29 @@ const Dashboard = () => {
                         Manage Decks
                     </Link>
                     {totalDecks > 0 && (
-                        <Link
-                            to={`/study/${decks[0].id}`}
-                            className="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700"
-                        >
-                            Start Studying
-                        </Link>
+                        <div className="flex flex-wrap gap-4">
+                            {decks.map(deck => {
+                                // Get all cards for this deck
+                                const deckCards = allCards.filter(card => card.deckId === deck.id);
+                                // Count due and new cards
+                                const dueCards = getDueCards(deckCards);
+                                const newCards = deckCards.filter(card => card.repetitions === 0);
+                                const pendingCount = [...new Set([...dueCards, ...newCards].map(c => c.id))].length;
+
+                                return (
+                                    <Link
+                                        key={deck.id}
+                                        to={`/study/${deck.id}`}
+                                        className="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 flex items-center gap-2"
+                                    >
+                                        Study "{deck.name}"
+                                        <span className="ml-2 px-2 py-1 bg-white text-green-700 rounded text-xs font-bold">
+                                            {pendingCount} pending
+                                        </span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
                     )}
                 </div>
             </div>
