@@ -29,7 +29,9 @@ function useDecks() {
     // Add a new deck
     const addDeck = (deckData) => {
         const newDeck = createDeck(deckData);
-        setDecks([...decks, newDeck]);
+        const updatedDecks = [...decks, newDeck];
+        setDecks(updatedDecks);
+        saveDecks(updatedDecks); // <-- Save immediately
         return newDeck;
     };
 

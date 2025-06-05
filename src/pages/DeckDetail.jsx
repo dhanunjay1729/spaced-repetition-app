@@ -8,6 +8,7 @@ import useDecks from '../hooks/useDecks';
 import useCards from '../hooks/useCards';
 import CardForm from '../components/CardForm';
 import Card from '../components/Card';
+import StudyProgress from '../components/StudyProgress';
 
 const DeckDetail = () => {
     // the current deckId is extracted from the URL parameters
@@ -84,6 +85,10 @@ const DeckDetail = () => {
                         <p className="text-sm text-gray-500 mt-2">
                             {cards.length} {cards.length === 1 ? 'card' : 'cards'}
                         </p>
+                        {/* Study Progress */}
+                        {cards.length > 0 && (
+                            <StudyProgress cards={cards} />
+                        )}
                     </div>
                     <div className="flex gap-4">
                         {cards.length > 0 && (
