@@ -1,83 +1,67 @@
 import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-const DeckForm = ({ onSubmit, onCancel }) => {
-    const [formData, setFormData] = useState({
-        name: '',
-        description: ''
-    });
+const DeckForm = ({ onSubmit, onCancel, initialData }) => {
+    const [formData, setFormData] = useState(
+        initialData || { name: '', description: '' }
+    );
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Basic validation
         if (!formData.name.trim()) {
-            alert('Please enter a deck name');
+            toast.error('Deck name is required!');
             return;
         }
-        onSubmit(formData);
-        // Reset form
-        setFormData({ name: '', description: '' });
+        try {
+            if (initialData) {
+                onSubmit({ ...formData, id: initialData.id });
+                toast.success('Deck updated!');
+            } else {
+                onSubmit(formData);
+                toast.success('Deck created!');
+            }
+        } catch (err) {
+            toast.error('Failed to save deck!');
+        }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold mb-6">Create New Deck</h2>
-            
-            <div className="mb-4">
-                <label
-                    htmlFor="name"
-                    className="block text-gray-700 font-medium mb-2"
-                >
-                    Deck Name *
-                </label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <label className="block mb-1 font-medium">Deck Name</label>
                 <input
                     type="text"
-                    id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
-                    placeholder="e.g., JavaScript Arrays"
-                    autoFocus
+                    className="w-full border rounded px-3 py-2"
+                    required
                 />
             </div>
-            
-            <div className="mb-6">
-                <label
-                    htmlFor="description"
-                    className="block text-gray-700 font-medium mb-2"
-                >
-                    Description
-                </label>
+            <div>
+                <label className="block mb-1 font-medium">Description</label>
                 <textarea
-                    id="description"
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    rows="3"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none"
-                    placeholder="Brief description of what this deck covers..."
+                    className="w-full border rounded px-3 py-2"
                 />
             </div>
-            
             <div className="flex gap-4">
                 <button
                     type="submit"
-                    className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
-                    Create Deck
+                    {initialData ? 'Update Deck' : 'Create Deck'}
                 </button>
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-6 py-2 bg-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-400"
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
                 >
                     Cancel
                 </button>

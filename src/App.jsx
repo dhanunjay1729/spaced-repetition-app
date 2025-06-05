@@ -1,6 +1,7 @@
 //this file defines app's main layout and routing structure
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Header from './components/Header';
 import DeckManager from './pages/DeckManager';
 import DeckDetail from './pages/DeckDetail';
@@ -11,6 +12,7 @@ function App() {
     return (
         <div className="min-h-screen bg-gray-100">
             <Header />
+            <Toaster position="top-right" reverseOrder={false} />
             <main>
                 <Routes>
                     <Route path="/" element={<Dashboard />} />

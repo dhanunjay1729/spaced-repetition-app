@@ -3,7 +3,7 @@
 
 // localStorage utility functions
 
-//localStorage can only store and remove whole values by key, not
+// localStorage can only store and remove whole values by key, not
 // individual properties, so we need to manage the 
 // data structure ourselves
 const STORAGE_KEYS = {

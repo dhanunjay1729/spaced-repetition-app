@@ -2,56 +2,75 @@ import { useState, useEffect } from 'react';
 import { loadDecks, saveDecks } from '../utils/localStorage';
 import { createDeck } from '../data/models';
 
-
 // A custom React hook for managing decks
-// What does it do?
-// 1. Loads decks from localStorage on mount
-// 2. Saves decks to localStorage whenever they change
-// 3. Provides functions to add, update, and delete decks
 function useDecks() {
     const [decks, setDecks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // Load decks on mount
     useEffect(() => {
-        const loadedDecks = loadDecks();
-        setDecks(loadedDecks);
-        setLoading(false);
+        try {
+            const loadedDecks = loadDecks();
+            setDecks(loadedDecks);
+        } catch (err) {
+            setError("Failed to load decks.");
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
     // Save decks whenever they change
     useEffect(() => {
         if (!loading) {
-            saveDecks(decks);
+            try {
+                saveDecks(decks);
+            } catch (err) {
+                setError("Failed to save decks.");
+            }
         }
     }, [decks, loading]);
 
     // Add a new deck
     const addDeck = (deckData) => {
-        const newDeck = createDeck(deckData);
-        const updatedDecks = [...decks, newDeck];
-        setDecks(updatedDecks);
-        saveDecks(updatedDecks); // <-- Save immediately
-        return newDeck;
+        try {
+            const newDeck = createDeck(deckData);
+            const updatedDecks = [...decks, newDeck];
+            setDecks(updatedDecks);
+            saveDecks(updatedDecks);
+            return newDeck;
+        } catch (err) {
+            setError("Failed to add deck.");
+            throw err;
+        }
     };
 
     // Update a deck
     const updateDeck = (deckId, updates) => {
-        setDecks(
-            decks.map(deck =>
-                deck.id === deckId ? { ...deck, ...updates } : deck
-            )
-        );
+        try {
+            setDecks(
+                decks.map(deck =>
+                    deck.id === deckId ? { ...deck, ...updates } : deck
+                )
+            );
+        } catch (err) {
+            setError("Failed to update deck.");
+        }
     };
 
     // Delete a deck
     const deleteDeck = (deckId) => {
-        setDecks(decks.filter(deck => deck.id !== deckId));
+        try {
+            setDecks(decks.filter(deck => deck.id !== deckId));
+        } catch (err) {
+            setError("Failed to delete deck.");
+        }
     };
 
     return {
         decks,
         loading,
+        error,
         addDeck,
         updateDeck,
         deleteDeck

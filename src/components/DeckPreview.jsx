@@ -1,21 +1,32 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-const DeckPreview = ({ name, cardCount, dueCount }) => {
-  return (
-    <div className="relative bg-gray-900 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all cursor-pointer transform hover:-translate-y-2 hover:scale-105">
-      {/* Glow Effect */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 opacity-20 blur-lg"></div>
+const DeckPreview = ({ deck }) => {
+    if (!deck) {
+        return (
+            <div className="p-4 bg-red-100 text-red-700 rounded">
+                Deck not found.
+            </div>
+        );
+    }
 
-      {/* Content */}
-      <div className="relative z-10">
-        <h3 className="text-3xl font-bold text-white mb-4">{name}</h3>
-        <div className="flex justify-between items-center text-gray-300">
-          <span className="text-lg">{cardCount} cards</span>
-          <span className="text-pink-400 font-semibold text-lg">{dueCount} due</span>
+    return (
+        <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition">
+            <h2 className="text-xl font-bold mb-2">{deck.name}</h2>
+            {deck.description && (
+                <p className="text-gray-600 mb-2">{deck.description}</p>
+            )}
+            <p className="text-gray-500 text-sm mb-4">
+                {deck.cardCount || 0} {deck.cardCount === 1 ? 'card' : 'cards'}
+            </p>
+            <Link
+                to={`/deck/${deck.id}`}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+                View Deck
+            </Link>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default DeckPreview;

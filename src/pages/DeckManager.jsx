@@ -1,38 +1,57 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import ErrorMessage from '../components/ErrorMessage';
 import useDecks from '../hooks/useDecks';
 import DeckForm from '../components/DeckForm';
 
 const DeckManager = () => {
     const navigate = useNavigate();
-    const { decks, loading, addDeck, deleteDeck } = useDecks();
+    const { decks, loading, error, addDeck, deleteDeck } = useDecks();
     const [showForm, setShowForm] = useState(false);
 
     const handleCreateDeck = (deckData) => {
-        const newDeck = addDeck(deckData);
-        setShowForm(false);
-        // Navigate to the new deck
-        navigate(`/deck/${newDeck.id}`);
+        try {
+            const newDeck = addDeck(deckData);
+            setShowForm(false);
+            toast.success('Deck created!');
+            navigate(`/deck/${newDeck.id}`);
+        } catch (err) {
+            toast.error('Failed to create deck!');
+        }
     };
 
     const handleDeleteDeck = (deckId, event) => {
-        event.stopPropagation(); // Prevent navigation when clicking delete
+        event.stopPropagation();
         if (window.confirm('Are you sure you want to delete this deck? All cards will be lost!')) {
-            // Delete associated cards
-            const allCards = JSON.parse(localStorage.getItem('sra_cards') || '[]');
-            const remainingCards = allCards.filter(card => card.deckId !== deckId);
-            localStorage.setItem('sra_cards', JSON.stringify(remainingCards));
-            // Delete deck
-            deleteDeck(deckId);
+            try {
+                // Delete associated cards
+                const allCards = JSON.parse(localStorage.getItem('sra_cards') || '[]');
+                const remainingCards = allCards.filter(card => card.deckId !== deckId);
+                localStorage.setItem('sra_cards', JSON.stringify(remainingCards));
+                // Delete deck
+                deleteDeck(deckId);
+                toast('Deck deleted', { icon: '🗑️' });
+            } catch (err) {
+                toast.error('Failed to delete deck!');
+            }
         }
     };
 
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
-                <p className="text-gray-500">Loading decks...</p>
+                <svg className="animate-spin h-8 w-8 text-blue-600 mr-3" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+                <span className="text-gray-500">Loading decks...</span>
             </div>
         );
+    }
+
+    if (error) {
+        return <ErrorMessage message={error} />;
     }
 
     return (
