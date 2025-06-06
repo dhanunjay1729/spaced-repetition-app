@@ -7,6 +7,9 @@ import DeckManager from './pages/DeckManager';
 import DeckDetail from './pages/DeckDetail';
 import StudySession from './pages/StudySession';
 import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
     return (
@@ -15,10 +18,43 @@ function App() {
             <Toaster position="top-right" reverseOrder={false} />
             <main>
                 <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/decks" element={<DeckManager />} />
-                    <Route path="/deck/:deckId" element={<DeckDetail />} />
-                    <Route path="/study/:deckId" element={<StudySession />} />
+                    {/* Public Routes */}
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+
+                    {/* Protected Routes */}
+                    <Route
+                        path="/"
+                        element={
+                            <ProtectedRoute>
+                                <Dashboard />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/decks"
+                        element={
+                            <ProtectedRoute>
+                                <DeckManager />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/deck/:deckId"
+                        element={
+                            <ProtectedRoute>
+                                <DeckDetail />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/study/:deckId"
+                        element={
+                            <ProtectedRoute>
+                                <StudySession />
+                            </ProtectedRoute>
+                        }
+                    />
                 </Routes>
             </main>
         </div>
