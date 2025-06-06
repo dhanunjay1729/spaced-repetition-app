@@ -14,53 +14,64 @@ const Login = () => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             localStorage.setItem('isLoggedIn', true); // Save login state
-            navigate('/dashboard'); // Redirect to dashboard
+            navigate('/'); // Redirect to dashboard
         } catch (err) {
             setError('Invalid email or password.');
         }
     };
 
     return (
-        <div className="container mx-auto p-6 max-w-md">
-            <h1 className="text-2xl font-bold mb-6">Login</h1>
-            <form onSubmit={handleLogin} className="space-y-4">
-                <div>
-                    <label className="block mb-1 font-medium">Email</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full border rounded px-3 py-2"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block mb-1 font-medium">Password</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full border rounded px-3 py-2"
-                        required
-                    />
-                </div>
-                {error && <p className="text-red-500">{error}</p>}
-                <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                    Login
-                </button>
-            </form>
-            <p className="text-gray-500 mt-4">
-                Don't have an account?{' '}
-                <button
-                    onClick={() => navigate('/signup')}
-                    className="text-blue-600 hover:underline"
-                >
-                    Sign up
-                </button>
-            </p>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-gray-800 to-gray-900">
+            {/* Branding Section */}
+            <div className="mb-8 text-center">
+                <h1 className="text-4xl font-extrabold text-white">Spaced Repetition App</h1>
+                <p className="text-gray-300 mt-2">Master your learning with smart repetition techniques</p>
+            </div>
+
+            {/* Login Form */}
+            <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+                <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">Login</h2>
+                <form onSubmit={handleLogin} className="space-y-6">
+                    <div>
+                        <label className="block mb-2 text-sm font-medium text-gray-700">Email</label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-800"
+                            placeholder="Enter your email"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-2 text-sm font-medium text-gray-700">Password</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-800"
+                            placeholder="Enter your password"
+                            required
+                        />
+                    </div>
+                    {error && <p className="text-red-500 text-sm">{error}</p>}
+                    <button
+                        type="submit"
+                        className="w-full px-4 py-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-lg hover:opacity-90 transition"
+                    >
+                        Login
+                    </button>
+                </form>
+                <p className="text-gray-500 mt-6 text-center">
+                    Don't have an account?{' '}
+                    <button
+                        onClick={() => navigate('/signup')}
+                        className="text-gray-800 font-medium hover:underline"
+                    >
+                        Sign up
+                    </button>
+                </p>
+            </div>
         </div>
     );
 };

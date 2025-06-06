@@ -1,6 +1,6 @@
 //this file defines app's main layout and routing structure
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Header from './components/Header';
 import DeckManager from './pages/DeckManager';
@@ -12,9 +12,15 @@ import Signup from './pages/Signup';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
+    const location = useLocation(); // Get the current route
+
+    // Check if the current route is Login or Signup
+    const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+
     return (
         <div className="min-h-screen bg-gray-100">
-            <Header />
+            {/* Render Header only if it's not an auth page */}
+            {!isAuthPage && <Header />}
             <Toaster position="top-right" reverseOrder={false} />
             <main>
                 <Routes>

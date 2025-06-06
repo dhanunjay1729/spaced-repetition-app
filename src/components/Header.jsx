@@ -1,13 +1,8 @@
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {
-    const location = useLocation();
     const navigate = useNavigate();
-
-    const isActive = (path) => {
-        return location.pathname === path;
-    };
 
     const handleLogout = () => {
         localStorage.removeItem('isLoggedIn'); // Clear login state
@@ -15,38 +10,33 @@ const Header = () => {
     };
 
     return (
-        <header className="bg-white shadow-md p-4">
+        <header className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg p-4">
             <div className="container mx-auto flex justify-between items-center">
-                <Link to="/" className="text-2xl font-bold hover:text-blue-200 transition">
-                    DSA Mastery
+                {/* Logo */}
+                <Link to="/" className="text-3xl font-extrabold tracking-wide hover:underline">
+                    Spaced Repetition
                 </Link>
-                <nav>
-                    <ul className="flex space-x-6">
-                        <li>
-                            <Link
-                                to="/"
-                                className={`hover:text-blue-200 transition ${
-                                    isActive('/') ? 'text-blue-200 font-semibold' : ''
-                                }`}
-                            >
-                                Dashboard
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                to="/decks"
-                                className={`hover:text-blue-200 transition ${
-                                    isActive('/decks') ? 'text-blue-200 font-semibold' : ''
-                                }`}
-                            >
-                                Decks
-                            </Link>
-                        </li>
-                    </ul>
+
+                {/* Navigation Links */}
+                <nav className="flex gap-8 ml-[-8rem]"> {/* Moved 2 rems left */}
+                    <Link
+                        to="/"
+                        className="text-lg font-medium hover:text-purple-300 transition"
+                    >
+                        Dashboard
+                    </Link>
+                    <Link
+                        to="/decks"
+                        className="text-lg font-medium hover:text-purple-300 transition"
+                    >
+                        Decks
+                    </Link>
                 </nav>
+
+                {/* Logout Button */}
                 <button
                     onClick={handleLogout}
-                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition shadow-md"
                 >
                     Logout
                 </button>

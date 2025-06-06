@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import ErrorMessage from '../components/ErrorMessage';
 import useDecks from '../hooks/useDecks';
 import DeckForm from '../components/DeckForm';
+import { loadCards } from '../utils/localStorage'; // Import function to load cards
 
 const DeckManager = () => {
     const navigate = useNavigate();
@@ -41,7 +42,7 @@ const DeckManager = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
-                <svg className="animate-spin h-8 w-8 text-blue-600 mr-3" viewBox="0 0 24 24">
+                <svg className="animate-spin h-8 w-8 text-slate-600 mr-3" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                 </svg>
@@ -54,6 +55,9 @@ const DeckManager = () => {
         return <ErrorMessage message={error} />;
     }
 
+    // Load all cards from localStorage
+    const allCards = loadCards();
+
     return (
         <div className="container mx-auto p-6">
             <div className="flex justify-between items-center mb-8">
@@ -61,7 +65,7 @@ const DeckManager = () => {
                 {!showForm && (
                     <button
                         onClick={() => setShowForm(true)}
-                        className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
+                        className="px-6 py-2 bg-slate-600 text-white font-medium rounded-lg hover:bg-slate-700 transition"
                     >
                         + New Deck
                     </button>
@@ -81,7 +85,7 @@ const DeckManager = () => {
                     {!showForm && (
                         <button
                             onClick={() => setShowForm(true)}
-                            className="text-blue-600 hover:text-blue-700 font-medium"
+                            className="text-slate-600 hover:text-slate-700 font-medium"
                         >
                             Create a deck
                         </button>
@@ -89,33 +93,39 @@ const DeckManager = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {decks.map(deck => (
-                        <Link
-                            key={deck.id}
-                            to={`/deck/${deck.id}`}
-                            className="relative group"
-                        >
-                            <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                                <h3 className="text-xl font-semibold mb-2">{deck.name}</h3>
-                                <div className="text-gray-600">
-                                    <p className="text-sm mb-1">{deck.description || 'No description'}</p>
-                                    <p className="font-medium">{deck.cardCount || 0} cards</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={(e) => handleDeleteDeck(deck.id, e)}
-                                className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition"
-                                title="Delete deck"
+                    {decks.map(deck => {
+                        // Calculate the number of cards dynamically
+                        const cardCount = allCards.filter(card => card.deckId === deck.id).length;
+
+                        return (
+                            <Link
+                                key={deck.id}
+                                to={`/deck/${deck.id}`}
+                                className="relative group"
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </Link>
-                    ))}
+                                <div className="bg-gradient-to-r from-slate-500 to-gray-500 text-white rounded-lg shadow-md p-6 hover:shadow-xl transition transform hover:scale-105">
+                                    <h3 className="text-xl font-semibold mb-2">{deck.name}</h3>
+                                    <div className="text-gray-200">
+                                        <p className="text-sm mb-1">{deck.description || 'No description'}</p>
+                                        <p className="font-medium">{cardCount} {cardCount === 1 ? 'card' : 'cards'}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={(e) => handleDeleteDeck(deck.id, e)}
+                                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition"
+                                    title="Delete deck"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </Link>
+                        );
+                    })}
                 </div>
             )}
         </div>
     );
 };
+
 export default DeckManager;

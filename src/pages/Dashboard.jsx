@@ -29,12 +29,9 @@ const Dashboard = () => {
 
     // Cards due today (simplified for now)
     const cardsDueToday = allCards.filter(card => {
-        //new Date() creates a new instance of date object with the 
-        // current date and time
-        const nextReview = new Date(card.nextReview);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return nextReview <= today;
+        const nextReviewDate = new Date(card.nextReview).toISOString().split('T')[0]; // Extract date
+        const todayDate = new Date().toISOString().split('T')[0]; // Extract today's date
+        return nextReviewDate === todayDate; // Compare dates
     }).length;
 
     // Deck deletion handler
@@ -56,29 +53,31 @@ const Dashboard = () => {
 
     return (
         <div className="container mx-auto p-6 max-w-6xl">
-            <h1 className="text-3xl font-bold mb-10">Dashboard</h1>
+            <h1 className="text-4xl font-extrabold mb-10 text-center text-gray-800">
+                Welcome to Your Dashboard
+            </h1>
             {/* Statistics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-                <div className="bg-white p-8 rounded-xl shadow-lg">
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">Total Decks</h3>
-                    <p className="text-3xl font-bold text-blue-600">{totalDecks}</p>
+                <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-8 rounded-xl shadow-lg text-white">
+                    <h3 className="text-lg font-semibold mb-2">Total Decks</h3>
+                    <p className="text-4xl font-bold">{totalDecks}</p>
                 </div>
-                <div className="bg-white p-8 rounded-xl shadow-lg">
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">Total Cards</h3>
-                    <p className="text-3xl font-bold text-green-600">{totalCards}</p>
+                <div className="bg-gradient-to-r from-green-500 to-green-700 p-8 rounded-xl shadow-lg text-white">
+                    <h3 className="text-lg font-semibold mb-2">Total Cards</h3>
+                    <p className="text-4xl font-bold">{totalCards}</p>
                 </div>
-                <div className="bg-white p-8 rounded-xl shadow-lg">
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">Due Today</h3>
-                    <p className="text-3xl font-bold text-orange-600">{cardsDueToday}</p>
+                <div className="bg-gradient-to-r from-orange-500 to-orange-700 p-8 rounded-xl shadow-lg text-white">
+                    <h3 className="text-lg font-semibold mb-2">Due Today</h3>
+                    <p className="text-4xl font-bold">{cardsDueToday}</p>
                 </div>
             </div>
             {/* Quick Actions */}
             <div className="bg-white p-8 rounded-xl shadow-lg mb-10">
-                <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+                <h2 className="text-2xl font-semibold mb-6 text-gray-800">Quick Actions</h2>
                 <div className="flex flex-wrap gap-4">
                     <Link
                         to="/decks"
-                        className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg shadow hover:bg-blue-700 transition"
+                        className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg shadow hover:bg-blue-700 transition transform hover:scale-105"
                     >
                         Manage Decks
                     </Link>
@@ -93,7 +92,10 @@ const Dashboard = () => {
                                 const pendingCount = [...new Set([...dueCards, ...newCards].map(c => c.id))].length;
 
                                 return (
-                                    <div key={deck.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-4 py-2 shadow hover:shadow-md transition">
+                                    <div
+                                        key={deck.id}
+                                        className="flex items-center gap-2 bg-gray-50 rounded-lg px-4 py-2 shadow hover:shadow-md transition transform hover:scale-105"
+                                    >
                                         <Link
                                             to={`/study/${deck.id}`}
                                             className="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition flex items-center gap-2"
@@ -120,10 +122,9 @@ const Dashboard = () => {
             {/* Recent Decks */}
             {decks.length > 0 && (
                 <div className="bg-white p-8 rounded-xl shadow-lg">
-                    <h2 className="text-xl font-semibold mb-4">Recent Decks</h2>
-                    <div className="space-y-3">
+                    <h2 className="text-2xl font-semibold mb-6 text-gray-800">Recent Decks</h2>
+                    <div className="space-y-4">
                         {decks.slice(0, 5).map(deck => {
-                            // Dynamically calculate the number of cards for this deck
                             const deckCards = allCards.filter(card => card.deckId === deck.id);
                             const cardCount = deckCards.length;
 
@@ -131,11 +132,11 @@ const Dashboard = () => {
                                 <Link
                                     key={deck.id}
                                     to={`/deck/${deck.id}`}
-                                    className="block p-4 border rounded-lg hover:bg-gray-50 transition"
+                                    className="block p-6 border border-gray-200 rounded-lg hover:bg-gray-100 transition transform hover:scale-105 shadow-sm"
                                 >
                                     <div className="flex justify-between items-center">
-                                        <span className="font-medium">{deck.name}</span>
-                                        <span className="text-gray-500">{cardCount} {cardCount === 1 ? 'card' : 'cards'}</span>
+                                        <span className="font-medium text-lg text-gray-800">{deck.name}</span>
+                                        <span className="text-sm text-gray-500">{cardCount} {cardCount === 1 ? 'card' : 'cards'}</span>
                                     </div>
                                 </Link>
                             );

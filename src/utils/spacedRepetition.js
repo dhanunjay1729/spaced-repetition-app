@@ -77,10 +77,10 @@ export const getDueCards = (cards) => {
  */
 export const getCardsByStatus = (cards) => {
   const now = new Date();
-  
+
   return cards.reduce((acc, card) => {
     const reviewDate = new Date(card.nextReview);
-    
+
     if (card.repetitions === 0) {
       acc.new.push(card);
     } else if (reviewDate <= now) {
@@ -90,7 +90,7 @@ export const getCardsByStatus = (cards) => {
     } else {
       acc.learned.push(card);
     }
-    
+
     return acc;
   }, { new: [], due: [], learning: [], learned: [] });
 };
