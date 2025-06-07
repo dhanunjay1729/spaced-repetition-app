@@ -4,6 +4,8 @@ import { initializeApp } from "firebase/app";
 
 import { getAuth } from "firebase/auth"; // Import Firebase Authentication
 
+import { getFirestore } from "firebase/firestore"; // Import Firestore
+
 import { getAnalytics } from "firebase/analytics";
 
 
@@ -19,7 +21,7 @@ const firebaseConfig = {
 
   projectId: "spaced-repetition-app-c53a4",
 
-  storageBucket: "spaced-repetition-app-c53a4.firebasestorage.app",
+  storageBucket: "spaced-repetition-app-c53a4.appspot.com",
 
   messagingSenderId: "72094141505",
 
@@ -32,12 +34,20 @@ const firebaseConfig = {
 
 // Initialize Firebase
 
+console.log("Initializing Firebase..."); // Debugging
 const app = initializeApp(firebaseConfig);
+console.log("Firebase initialized:", app); // Debugging
 
 
 // Initialize Firebase Authentication and export it
 
 export const auth = getAuth(app); // Export the auth object
+
+
+// Initialize Firestore and export it
+
+export const db = getFirestore(app);
+console.log("Firestore instance:", db); // Debugging
 
 
 // Initialize analytics only in production

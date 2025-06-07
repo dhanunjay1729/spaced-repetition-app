@@ -1,7 +1,7 @@
 //the Dashboard component serves as the main landing page for the
 // application, providing an overview of the user's decks and cards,
 //along with quick access to manage decks and start studying.
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 // react-router-dom is used for navigation between different pages
 //without reloading the page.
 import { Link } from 'react-router-dom';
@@ -13,36 +13,56 @@ import useDecks from '../hooks/useDecks';
 //the utils folder contains utility functions that are not tied to 
 // react, but help with general tasks like data fetching or 
 // local storage management
-import { loadCards } from '../utils/localStorage';
+import { fetchCards } from '../utils/firestore'; // Import Firestore-based fetchCards
 import { getDueCards } from '../utils/spacedRepetition';
 import ErrorMessage from '../components/ErrorMessage';
+import { handleError } from '../utils/errorHandler'; // Import centralized error handler
 
 const Dashboard = () => {
-    //an array of decks is fetched from the custom hook useDecks
+    // Fetch decks using the useDecks hook
     const { decks, error, deleteDeck } = useDecks();
-    //an array of all cards is fetched from the utility function loadCards
-    const allCards = loadCards();
+
+    // State for all cards
+    const [allCards, setAllCards] = useState([]);
+    const [loadingCards, setLoadingCards] = useState(true);
+
+    // Fetch all cards from Firestore
+    useEffect(() => {
+        const fetchAllCards = async () => {
+            try {
+                const cards = await fetchCards(); // Fetch all cards
+                console.log('Fetched cards:', cards); // Debugging
+                setAllCards(cards);
+            } catch (err) {
+                handleError(err, 'Dashboard - fetchAllCards');
+            } finally {
+                setLoadingCards(false);
+            }
+        };
+        fetchAllCards();
+    }, []);
 
     // Calculate statistics
     const totalCards = allCards.length;
     const totalDecks = decks.length;
 
-    // Cards due today (simplified for now)
+    // Cards due today
     const cardsDueToday = allCards.filter(card => {
         const nextReviewDate = new Date(card.nextReview).toISOString().split('T')[0]; // Extract date
         const todayDate = new Date().toISOString().split('T')[0]; // Extract today's date
+        console.log(`Card ID: ${card.id}, Next Review: ${nextReviewDate}, Today: ${todayDate}`); // Debugging
         return nextReviewDate === todayDate; // Compare dates
     }).length;
 
     // Deck deletion handler
-    const handleDeleteDeck = (deckId, event) => {
+    const handleDeleteDeck = async (deckId, event) => {
         event.stopPropagation();
         if (window.confirm('Are you sure you want to delete this deck?')) {
             try {
-                deleteDeck(deckId);
+                await deleteDeck(deckId);
                 toast('Deck deleted', { icon: '🗑️' });
-            } catch {
-                toast.error('Failed to delete deck!');
+            } catch (err) {
+                handleError(err, 'Dashboard - handleDeleteDeck'); // Use centralized error handler
             }
         }
     };
@@ -89,7 +109,8 @@ const Dashboard = () => {
                                 // Count due and new cards
                                 const dueCards = getDueCards(deckCards);
                                 const newCards = deckCards.filter(card => card.repetitions === 0);
-                                const pendingCount = [...new Set([...dueCards, ...newCards].map(c => c.id))].length;
+                                const pendingCards = [...new Set([...dueCards, ...newCards].map(c => c.id))].length;
+                                console.log(`Deck ID: ${deck.id}, Due Cards: ${dueCards.length}, New Cards: ${newCards.length}, Pending Count: ${pendingCards}`); // Debugging
 
                                 return (
                                     <div
@@ -102,7 +123,7 @@ const Dashboard = () => {
                                         >
                                             <span>Study "{deck.name}"</span>
                                             <span className="bg-white text-green-600 px-2 py-1 rounded-full text-xs font-bold">
-                                                {pendingCount} Pending
+                                                {pendingCards} Pending
                                             </span>
                                         </Link>
                                         <button

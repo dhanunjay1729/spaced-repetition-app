@@ -17,7 +17,7 @@ const DeckPreview = ({ deck }) => {
                 <p className="text-gray-600 mb-2">{deck.description}</p>
             )}
             <p className="text-gray-500 text-sm mb-4">
-                {deck.cardCount || 0} {deck.cardCount === 1 ? 'card' : 'cards'}
+                {deck.totalCards || 0} {deck.totalCards === 1 ? 'card' : 'cards'}
             </p>
             <Link
                 to={`/deck/${deck.id}`}

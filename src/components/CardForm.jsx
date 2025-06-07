@@ -13,11 +13,12 @@ const CardForm = ({ onSubmit, onCancel, initialData }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         try {
+            const nextReview = initialData?.nextReview || new Date().toISOString(); // Use existing or current date
             if (initialData) {
-                onSubmit({ ...formData, id: initialData.id });
+                onSubmit({ ...formData, id: initialData.id, nextReview });
                 toast.success('Card updated!');
             } else {
-                onSubmit(formData);
+                onSubmit({ ...formData, nextReview });
                 toast.success('Card created!');
             }
         } catch (err) {

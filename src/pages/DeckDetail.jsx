@@ -10,11 +10,12 @@ import StudyProgress from '../components/StudyProgress';
 const DeckDetail = () => {
     const { deckId } = useParams();
     const { decks } = useDecks();
-    const { cards, error, addCard, updateCard, deleteCard } = useCards(deckId);
+    const { cards, error, addCard, updateCard, deleteCard } = useCards(deckId); // Updated destructuring
 
     const [showForm, setShowForm] = useState(false);
     const [editingCard, setEditingCard] = useState(null);
-    const [flippedCards, setFlippedCards] = useState({}); // Track flipped state for each card
+    const [flippedCards, setFlippedCards] = useState({});
+    console.log('Initial flippedCards state:', flippedCards); // Debugging
 
     const deck = decks.find(d => d.id === deckId);
 
@@ -23,15 +24,22 @@ const DeckDetail = () => {
     }
 
     const handleFlipCard = (cardId) => {
-        setFlippedCards(prev => ({
-            ...prev,
-            [cardId]: !prev[cardId], // Toggle flipped state for the card
-        }));
+        console.log('Before flip:', flippedCards); // Debugging
+        setFlippedCards((prev) => {
+            const updatedState = {
+                ...prev,
+                [cardId]: !prev[cardId], // Toggle flipped state for the card
+            };
+            console.log('After flip:', updatedState); // Debugging
+            return updatedState;
+        });
     };
 
     const handleCreateCard = (cardData) => {
         try {
-            addCard({ ...cardData, deckId });
+            const nextReview = new Date().toISOString(); // Debugging
+            console.log('Setting nextReview:', nextReview); // Debugging
+            addCard({ ...cardData, deckId, nextReview });
             setShowForm(false);
             toast.success('Card added!');
         } catch (err) {
@@ -41,6 +49,9 @@ const DeckDetail = () => {
 
     const handleUpdateCard = (cardData) => {
         try {
+            if (!cardData.nextReview || isNaN(new Date(cardData.nextReview).getTime())) {
+                throw new Error('Invalid nextReview date');
+            }
             updateCard(cardData.id, cardData);
             setShowForm(false);
             setEditingCard(null);
@@ -53,9 +64,11 @@ const DeckDetail = () => {
     const handleDeleteCard = (cardId) => {
         if (window.confirm('Are you sure you want to delete this card?')) {
             try {
-                deleteCard(cardId);
+                console.log(`Deleting card with ID: ${cardId}`); // Debugging
+                deleteCard(cardId); // Updated function name
                 toast('Card deleted', { icon: '🗑️' });
             } catch (err) {
+                console.error(`Failed to delete card with ID: ${cardId}`, err); // Debugging
                 toast.error('Failed to delete card!');
             }
         }
@@ -143,28 +156,47 @@ const DeckDetail = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {cards.map(card => (
-                        <div
-                            key={card.id}
-                            className={`p-6 rounded-xl shadow-lg hover:shadow-2xl transition flex flex-col items-center cursor-pointer ${
-                                flippedCards[card.id] ? 'bg-green-100' : 'bg-red-100'
-                            }`}
-                            onClick={() => handleFlipCard(card.id)}
-                        >
-                            {flippedCards[card.id] ? (
-                                <p className="text-gray-600 mb-2">A: {card.answer}</p>
-                            ) : (
-                                <>
-                                    <h3 className="font-semibold text-gray-800 mb-2 text-lg">
-                                        Q: {card.question}
-                                    </h3>
-                                    <p className="text-sm text-gray-500">
-                                        Next Review: <span className="font-medium">{new Date(card.nextReview).toLocaleString()}</span>
-                                    </p>
-                                </>
-                            )}
-                        </div>
-                    ))}
+                    {cards.map(card => {
+                        console.log('Rendering card:', card.id, 'Flipped state:', flippedCards[card.id]); // Debugging
+                        return (
+                            <div
+                                key={card.id}
+                                onClick={() => {
+                                    console.log('Card clicked:', card.id); // Debugging
+                                    handleFlipCard(card.id);
+                                }}
+                                className={`relative p-6 rounded-xl shadow-lg hover:shadow-2xl transition flex flex-col items-center cursor-pointer ${
+                                    flippedCards[card.id] ? 'bg-green-100' : 'bg-red-100'
+                                }`}
+                            >
+                                {/* Delete Button */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Prevent triggering the flip when clicking delete
+                                        handleDeleteCard(card.id);
+                                    }}
+                                    className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center text-white bg-gray-400 rounded-full hover:bg-red-500 transition"
+                                    title="Delete Card"
+                                >
+                                    ×
+                                </button>
+
+                                {/* Card Content */}
+                                {flippedCards[card.id] ? (
+                                    <p className="text-gray-600 mb-2">A: {card.answer}</p>
+                                ) : (
+                                    <>
+                                        <h3 className="font-semibold text-gray-800 mb-2 text-lg">
+                                            Q: {card.question}
+                                        </h3>
+                                        <p className="text-sm text-gray-500">
+                                            Next Review: <span className="font-medium">{new Date(card.nextReview).toLocaleString()}</span>
+                                        </p>
+                                    </>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </div>

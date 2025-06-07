@@ -58,19 +58,19 @@ export const saveCards = (cards) => {
     return saveToStorage(STORAGE_KEYS.CARDS, cards);
 };
 
-export const loadCards = () => {
+export const fetchCards = () => {
     return loadFromStorage(STORAGE_KEYS.CARDS, []);
 };
 
 // Get cards for a specific deck
 export const getCardsByDeckId = (deckId) => {
-    const allCards = loadCards();
+    const allCards = fetchCards();
     return allCards.filter(card => card.deckId === deckId);
 };
 
 // Update a single card
 export const updateCard = (cardId, updates) => {
-    const cards = loadCards();
+    const cards = fetchCards();
     const index = cards.findIndex(card => card.id === cardId);
     if (index !== -1) {
         cards[index] = { ...cards[index], ...updates };
