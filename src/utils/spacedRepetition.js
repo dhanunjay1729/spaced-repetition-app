@@ -62,11 +62,12 @@ export const calculateSM2 = (card, quality) => {
  */
 export const getDueCards = (cards) => {
   const now = new Date();
-  now.setHours(23, 59, 59, 999); // Include all cards due today
-  
+  now.setHours(23, 59, 59, 999); // Set to the end of today
+
   return cards.filter(card => {
     const reviewDate = new Date(card.nextReview);
-    return reviewDate <= now;
+    console.log(`Card ID: ${card.id}, Next Review: ${reviewDate}, Today (end of day): ${now}`); // Debugging
+    return reviewDate <= now; // Include cards due before or exactly today
   });
 };
 

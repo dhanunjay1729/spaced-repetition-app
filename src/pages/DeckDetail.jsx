@@ -6,6 +6,7 @@ import useCards from '../hooks/useCards';
 import CardForm from '../components/CardForm';
 import ErrorMessage from '../components/ErrorMessage';
 import StudyProgress from '../components/StudyProgress';
+import { createCard } from '../data/models'; // Import the createCard function
 
 const DeckDetail = () => {
     const { deckId } = useParams();
@@ -37,9 +38,9 @@ const DeckDetail = () => {
 
     const handleCreateCard = (cardData) => {
         try {
-            const nextReview = new Date().toISOString(); // Debugging
-            console.log('Setting nextReview:', nextReview); // Debugging
-            addCard({ ...cardData, deckId, nextReview });
+            const newCard = createCard({ ...cardData, deckId }); // Use createCard to initialize all properties
+            console.log('Creating card with the following properties:', newCard); // Log all properties
+            addCard(newCard); // Save the card to Firestore
             setShowForm(false);
             toast.success('Card added!');
         } catch (err) {
