@@ -12,26 +12,21 @@ import { RATING_OPTIONS } from '../data/models';
  * @returns {Object} Updated card properties
  */
 export const calculateSM2 = (card, quality) => {
-  // Copy current values
+  console.log('Calculating SM-2 for card:', card, 'Quality:', quality); // Debugging
   let { interval, repetitions, easeFactor } = card;
-  
-  // Calculate new ease factor
-  // EF' = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
+
   const newEaseFactor = Math.max(
     1.3, 
     easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
   );
-  
-  // Calculate next interval
+
   let newInterval;
   let newRepetitions;
-  
+
   if (quality < 3) {
-    // If quality is less than 3, restart learning
     newInterval = 1;
     newRepetitions = 0;
   } else {
-    // Calculate based on previous values
     if (repetitions === 0) {
       newInterval = 1;
     } else if (repetitions === 1) {
@@ -41,18 +36,20 @@ export const calculateSM2 = (card, quality) => {
     }
     newRepetitions = repetitions + 1;
   }
-  
-  // Calculate next review date
+
   const nextReviewDate = new Date();
   nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
-  
-  return {
+
+  const updatedCard = {
     interval: newInterval,
     repetitions: newRepetitions,
     easeFactor: newEaseFactor,
     nextReview: nextReviewDate.toISOString(),
     lastReviewed: new Date().toISOString()
   };
+
+  console.log('Updated card properties:', updatedCard); // Debugging
+  return updatedCard;
 };
 
 /**

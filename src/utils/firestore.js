@@ -45,7 +45,7 @@ export const saveCard = async (cardData) => {
       throw new Error('Invalid nextReview date');
     }
     const docRef = await addDoc(collection(db, CARDS_COLLECTION), cardData);
-    return { id: docRef.id, ...cardData };
+    return { id: docRef.id, ...cardData }; // Use Firestore document ID as the card ID
   } catch (error) {
     console.error('Error saving card:', error);
     throw error;
@@ -89,7 +89,7 @@ export const updateCard = async (cardId, updatedData) => {
     if (!updatedData.nextReview || isNaN(new Date(updatedData.nextReview).getTime())) {
       throw new Error('Invalid nextReview date');
     }
-    const cardRef = doc(db, CARDS_COLLECTION, cardId);
+    const cardRef = doc(db, CARDS_COLLECTION, cardId); // Use Firestore document ID
     await updateDoc(cardRef, updatedData);
   } catch (error) {
     console.error('Error updating card:', error);

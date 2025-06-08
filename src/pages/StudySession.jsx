@@ -43,26 +43,37 @@ const StudySession = () => {
     if (sessionComplete) return;
     const card = sessionCards[currentIndex];
     try {
-      const updated = calculateSM2(card, rating);
-      updateCard(card.id, updated);
+        console.log('Original card data:', card); // Debugging
+        const updated = calculateSM2(card, rating);
+        console.log('Updated card data:', updated); // Debugging
+        updateCard(card.id, updated);
 
-      setSessionStats(prev => ({
-        ...prev,
-        completed: prev.completed + 1,
-        correct: rating >= 3 ? prev.correct + 1 : prev.correct,
-        ratings: { ...prev.ratings, [rating]: (prev.ratings[rating] || 0) + 1 }
-      }));
+        // Update session stats
+        setSessionStats(prev => ({
+            ...prev,
+            completed: prev.completed + 1,
+            correct: rating >= 3 ? prev.correct + 1 : prev.correct,
+            ratings: { ...prev.ratings, [rating]: (prev.ratings[rating] || 0) + 1 }
+        }));
 
-      toast.success('Progress saved!');
+        // Update sessionCards to reflect the updated card
+        setSessionCards(prevCards => {
+            return prevCards.map(c =>
+                c.id === card.id ? { ...c, ...updated } : c
+            );
+        });
 
-      if (currentIndex + 1 < sessionCards.length) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        setSessionComplete(true);
-        toast.success('Study session complete! 🎉');
-      }
-    } catch {
-      toast.error('Failed to save progress!');
+        toast.success('Progress saved!');
+
+        if (currentIndex + 1 < sessionCards.length) {
+            setCurrentIndex(currentIndex + 1);
+        } else {
+            setSessionComplete(true);
+            toast.success('Study session complete! 🎉');
+        }
+    } catch (error) {
+        console.error('Error saving progress:', error); // Debugging
+        toast.error('Failed to save progress!');
     }
   };
 

@@ -18,7 +18,6 @@ export const createDeck = (data) => {
 // Card model with SM-2 algorithm properties
 export const createCard = (data) => {
   return {
-    id: generateId(),
     deckId: data.deckId,
     question: data.question || '',
     answer: data.answer || '',
