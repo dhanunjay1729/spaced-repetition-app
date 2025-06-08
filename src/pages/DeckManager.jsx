@@ -5,6 +5,8 @@ import ErrorMessage from '../components/ErrorMessage';
 import useDecks from '../hooks/useDecks';
 import { fetchCards } from '../utils/firestore'; // Import Firestore-based fetchCards
 import DeckForm from '../components/DeckForm';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import styles
 
 const DeckManager = () => {
     const { decks, loading, error, addDeck, removeDeck } = useDecks();
@@ -45,14 +47,27 @@ const DeckManager = () => {
     };
 
     const handleDeleteDeck = async (deckId) => {
-        if (window.confirm('Are you sure you want to delete this deck? All cards will be lost!')) {
-            try {
-                await removeDeck(deckId);
-                toast.success('Deck deleted!');
-            } catch (err) {
-                toast.error('Failed to delete deck!');
-            }
-        }
+        confirmAlert({
+            title: 'Confirm Deck Deletion',
+            message: 'Are you sure you want to delete this deck? All cards will be lost!',
+            buttons: [
+                {
+                    label: 'Yes',
+                    onClick: async () => {
+                        try {
+                            await removeDeck(deckId);
+                            toast.success('Deck deleted!');
+                        } catch (err) {
+                            toast.error('Failed to delete deck!');
+                        }
+                    },
+                },
+                {
+                    label: 'No',
+                    onClick: () => toast('Deletion canceled'),
+                },
+            ],
+        });
     };
 
     if (loading) {

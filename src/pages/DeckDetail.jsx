@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import styles
 import useDecks from '../hooks/useDecks';
 import useCards from '../hooks/useCards';
 import CardForm from '../components/CardForm';
@@ -63,16 +65,27 @@ const DeckDetail = () => {
     };
 
     const handleDeleteCard = (cardId) => {
-        if (window.confirm('Are you sure you want to delete this card?')) {
-            try {
-                console.log(`Deleting card with ID: ${cardId}`); // Debugging
-                deleteCard(cardId); // Updated function name
-                toast('Card deleted', { icon: '🗑️' });
-            } catch (err) {
-                console.error(`Failed to delete card with ID: ${cardId}`, err); // Debugging
-                toast.error('Failed to delete card!');
-            }
-        }
+        confirmAlert({
+            title: 'Confirm Card Deletion',
+            message: 'Are you sure you want to delete this card?',
+            buttons: [
+                {
+                    label: 'Yes',
+                    onClick: async () => {
+                        try {
+                            deleteCard(cardId);
+                            toast('Card deleted', { icon: '🗑️' });
+                        } catch (err) {
+                            toast.error('Failed to delete card!');
+                        }
+                    },
+                },
+                {
+                    label: 'No',
+                    onClick: () => toast('Deletion canceled'),
+                },
+            ],
+        });
     };
 
     const handleEditCard = (card) => {
