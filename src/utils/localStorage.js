@@ -7,8 +7,6 @@
 // individual properties, so we need to manage the 
 // data structure ourselves
 const STORAGE_KEYS = {
-    DECKS: 'sra_decks',
-    CARDS: 'sra_cards',
     SESSIONS: 'sra_sessions',
     SETTINGS: 'sra_settings'
 };
@@ -42,40 +40,4 @@ export const removeFromStorage = (key) => {
         console.error('Error removing from localStorage:', error);
         return false;
     }
-};
-
-// Deck-specific functions
-export const saveDecks = (decks) => {
-    return saveToStorage(STORAGE_KEYS.DECKS, decks);
-};
-
-export const loadDecks = () => {
-    return loadFromStorage(STORAGE_KEYS.DECKS, []);
-};
-
-// Card-specific functions
-export const saveCards = (cards) => {
-    return saveToStorage(STORAGE_KEYS.CARDS, cards);
-};
-
-export const fetchCards = () => {
-    return loadFromStorage(STORAGE_KEYS.CARDS, []);
-};
-
-// Get cards for a specific deck
-export const getCardsByDeckId = (deckId) => {
-    const allCards = fetchCards();
-    return allCards.filter(card => card.deckId === deckId);
-};
-
-// Update a single card
-export const updateCard = (cardId, updates) => {
-    const cards = fetchCards();
-    const index = cards.findIndex(card => card.id === cardId);
-    if (index !== -1) {
-        cards[index] = { ...cards[index], ...updates };
-        saveCards(cards);
-        return cards[index];
-    }
-    return null;
 };
