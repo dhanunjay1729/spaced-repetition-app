@@ -28,7 +28,8 @@ function useDecks() {
     try {
       const newDeck = await saveDeck(deckData);
       setDecks([...decks, newDeck]);
-    } catch (err) {
+    } catch (error) {
+      handleError(error, 'useDecks-addDeck'); // Use centralized error handler
       setError("Failed to add deck.");
     }
   };
@@ -38,7 +39,8 @@ function useDecks() {
     try {
       await deleteDeck(deckId);
       setDecks(decks.filter((deck) => deck.id !== deckId));
-    } catch (err) {
+    } catch (error) {
+      handleError(error, 'useDecks-removeDeck'); // Use centralized error handler
       setError("Failed to delete deck.");
     }
   };

@@ -45,40 +45,23 @@ export const saveCard = async (cardData) => {
       throw new Error('Invalid nextReview date');
     }
     const docRef = await addDoc(collection(db, CARDS_COLLECTION), cardData);
-    return { id: docRef.id, ...cardData }; // Use Firestore document ID as the card ID
+    return { id: docRef.id, ...cardData };
   } catch (error) {
-    console.error('Error saving card:', error);
-    throw error;
+    handleError(error, 'firestore-saveCard'); // Use centralized error handler
+    throw error; // Re-throw the error for further handling if needed
   }
 };
 
 // Load all cards for a specific deck
 export const fetchCards = async (deckId) => {
   try {
-    console.log('Loading cards for deckId:', deckId); // Debugging
     const cardsQuery = deckId
       ? query(collection(db, CARDS_COLLECTION), where("deckId", "==", deckId))
-      : collection(db, CARDS_COLLECTION); // Load all cards if deckId is not provided
+      : collection(db, CARDS_COLLECTION);
     const querySnapshot = await getDocs(cardsQuery);
-    const cards = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    console.log('Loaded cards:', cards); // Debugging
-    return cards;
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     handleError(error, 'firestore-fetchCards'); // Use centralized error handler
-    throw error;
-  }
-};
-
-// Delete a card
-export const deleteCard = async (cardId) => {
-  try {
-    console.log(`Attempting to delete card with ID: ${cardId}`); // Debugging
-    const cardRef = doc(db, CARDS_COLLECTION, cardId);
-    console.log(`Card reference:`, cardRef); // Debugging
-    await deleteDoc(cardRef);
-    console.log(`Card with ID: ${cardId} deleted successfully.`); // Debugging
-  } catch (error) {
-    console.error("Error deleting card:", error); // Debugging
     throw error;
   }
 };
@@ -89,10 +72,21 @@ export const updateCard = async (cardId, updatedData) => {
     if (!updatedData.nextReview || isNaN(new Date(updatedData.nextReview).getTime())) {
       throw new Error('Invalid nextReview date');
     }
-    const cardRef = doc(db, CARDS_COLLECTION, cardId); // Use Firestore document ID
+    const cardRef = doc(db, CARDS_COLLECTION, cardId);
     await updateDoc(cardRef, updatedData);
   } catch (error) {
-    console.error('Error updating card:', error);
+    handleError(error, 'firestore-updateCard'); // Use centralized error handler
+    throw error;
+  }
+};
+
+// Delete a card
+export const deleteCard = async (cardId) => {
+  try {
+    const cardRef = doc(db, CARDS_COLLECTION, cardId);
+    await deleteDoc(cardRef);
+  } catch (error) {
+    handleError(error, 'firestore-deleteCard'); // Use centralized error handler
     throw error;
   }
 };
