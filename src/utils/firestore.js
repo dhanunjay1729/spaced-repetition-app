@@ -1,6 +1,7 @@
+// utils/firestore.js
 import { collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, where } from "firebase/firestore";
-import { db } from '../firebase.js'; // Correct relative path
-import { handleError } from './errorHandler'; // Import centralized error handler
+import { db } from '../firebase.js';
+import { handleError } from './errorHandler';
 
 // Collection names (aligned with localStorage keys)
 const DECKS_COLLECTION = "sra_decks";
@@ -12,7 +13,7 @@ export const saveDeck = async (deckData) => {
     const docRef = await addDoc(collection(db, DECKS_COLLECTION), deckData);
     return { id: docRef.id, ...deckData };
   } catch (error) {
-    handleError(error, 'saveDeck'); // Use centralized error handler
+    handleError(error, 'saveDeck');
     throw error;
   }
 };
@@ -23,7 +24,7 @@ export const loadDecks = async () => {
     const querySnapshot = await getDocs(collection(db, DECKS_COLLECTION));
     return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
-    handleError(error, 'loadDecks'); // Use centralized error handler
+    handleError(error, 'loadDecks');
     throw error;
   }
 };
@@ -33,22 +34,30 @@ export const deleteDeck = async (deckId) => {
   try {
     await deleteDoc(doc(db, DECKS_COLLECTION, deckId));
   } catch (error) {
-    handleError(error, 'deleteDeck'); // Use centralized error handler
+    handleError(error, 'deleteDeck');
     throw error;
   }
 };
 
-// Save a new card
+// Save a new card with metadata support
 export const saveCard = async (cardData) => {
   try {
     if (!cardData.nextReview || isNaN(new Date(cardData.nextReview).getTime())) {
       throw new Error('Invalid nextReview date');
     }
-    const docRef = await addDoc(collection(db, CARDS_COLLECTION), cardData);
-    return { id: docRef.id, ...cardData };
+    
+    // Ensure metadata is included if present
+    const dataToSave = {
+      ...cardData,
+      metadata: cardData.metadata || {},
+      createdAt: new Date().toISOString()
+    };
+    
+    const docRef = await addDoc(collection(db, CARDS_COLLECTION), dataToSave);
+    return { id: docRef.id, ...dataToSave };
   } catch (error) {
-    handleError(error, 'firestore-saveCard'); // Use centralized error handler
-    throw error; // Re-throw the error for further handling if needed
+    handleError(error, 'firestore-saveCard');
+    throw error;
   }
 };
 
@@ -58,24 +67,30 @@ export const fetchCards = async (deckId) => {
     const cardsQuery = deckId
       ? query(collection(db, CARDS_COLLECTION), where("deckId", "==", deckId))
       : collection(db, CARDS_COLLECTION);
+    
     const querySnapshot = await getDocs(cardsQuery);
     return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
-    handleError(error, 'firestore-fetchCards'); // Use centralized error handler
+    handleError(error, 'firestore-fetchCards');
     throw error;
   }
 };
 
-// Update an existing card
+// Update an existing card with metadata support
 export const updateCard = async (cardId, updatedData) => {
   try {
     if (!updatedData.nextReview || isNaN(new Date(updatedData.nextReview).getTime())) {
       throw new Error('Invalid nextReview date');
     }
+    
+    // Preserve existing metadata and merge with new metadata if provided
     const cardRef = doc(db, CARDS_COLLECTION, cardId);
-    await updateDoc(cardRef, updatedData);
+    await updateDoc(cardRef, {
+      ...updatedData,
+      lastUpdated: new Date().toISOString()
+    });
   } catch (error) {
-    handleError(error, 'firestore-updateCard'); // Use centralized error handler
+    handleError(error, 'firestore-updateCard');
     throw error;
   }
 };
@@ -86,8 +101,24 @@ export const deleteCard = async (cardId) => {
     const cardRef = doc(db, CARDS_COLLECTION, cardId);
     await deleteDoc(cardRef);
   } catch (error) {
-    handleError(error, 'firestore-deleteCard'); // Use centralized error handler
+    handleError(error, 'firestore-deleteCard');
     throw error;
   }
 };
 
+// Get AI-generated cards count for analytics
+export const getAIGeneratedCardsCount = async (deckId) => {
+  try {
+    const cardsQuery = deckId
+      ? query(collection(db, CARDS_COLLECTION), where("deckId", "==", deckId))
+      : collection(db, CARDS_COLLECTION);
+    
+    const querySnapshot = await getDocs(cardsQuery);
+    const cards = querySnapshot.docs.map((doc) => doc.data());
+    
+    return cards.filter(card => card.metadata?.isAIGenerated).length;
+  } catch (error) {
+    handleError(error, 'getAIGeneratedCardsCount');
+    return 0;
+  }
+};
