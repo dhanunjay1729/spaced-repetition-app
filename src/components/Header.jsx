@@ -1,4 +1,6 @@
 import React from 'react';
+// Link is used for navigation btw pages without reloading the app
+// useNavigate is a hook that allows programmatic navigation
 import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {

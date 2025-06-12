@@ -1,16 +1,18 @@
+// responsible for configuring and initializing Firebase services
+// authentication, Firestore, and analytics
+
 // Import the functions you need from the SDKs you need
 
 import { initializeApp } from "firebase/app";
 
 import { getAuth } from "firebase/auth"; // Import Firebase Authentication
 
-import { getFirestore } from "firebase/firestore"; // Import Firestore
+import { getFirestore } from "firebase/firestore"; // Import Firestore, NoSQL database
 
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics } from "firebase/analytics";  // for tracking user behaviour
 
 
-// Load environment variables
-
+// Load environment variables, configuration details required to connect to Firebase
 const firebaseConfig = {
 
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

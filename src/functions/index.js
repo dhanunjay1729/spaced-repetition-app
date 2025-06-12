@@ -24,7 +24,7 @@ exports.generateWordDefinition = functions.https.onRequest((req, res) => {
           'Authorization': `Bearer ${OPENAI_API_KEY}`
         },
         body: JSON.stringify({
-          model: "gpt-4",
+          model: "gpt-4o-mini", // Update model here
           messages: [
             {
               role: "system",
@@ -79,7 +79,7 @@ exports.generateFlashcardContent = functions.https.onRequest(async (req, res) =>
     
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o.5-preview",
+        model: "gpt-4o-mini", // Update model here
         messages: [
           {
             role: "system",

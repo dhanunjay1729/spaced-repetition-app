@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import AIService from '../utils/aiService'; // Import AIService for generating hints
 
+//the flashcard data, including the question, answer, and metadata
 const Flashcard = ({ card, onRate }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showRating, setShowRating] = useState(false);
+  const [hint, setHint] = useState(''); // State to store the hint
+  const [loadingHint, setLoadingHint] = useState(false); // State to track hint loading
 
-  // Reset state when card changes
+  // Reset state when card changes (when a new card is loaded)
   useEffect(() => {
     setIsFlipped(false);
     setShowRating(false);
+    setHint(''); // Clear the hint when a new card is loaded
   }, [card.id]);
 
   const handleFlip = () => {
@@ -22,45 +27,39 @@ const Flashcard = ({ card, onRate }) => {
     setShowRating(false);
   };
 
+  const handleHint = async () => {
+    setLoadingHint(true); // Show loading state for the hint
+    try {
+      const hintResponse = await AIService.generateHint(card.question); // Fetch hint using AI
+      setHint(hintResponse); // Set the hint
+    } catch (error) {
+      console.error('Failed to fetch hint:', error);
+      setHint('Unable to fetch a hint at the moment. Please try again later.');
+    } finally {
+      setLoadingHint(false); // Hide loading state
+    }
+  };
+
   // Check if card is AI-generated
   const isAIGenerated = card.metadata?.isAIGenerated;
 
   // Format answer for display
   const formatAnswer = (answer) => {
     if (!answer) return '';
-    
+
     // If it's AI-generated content with line breaks, format it nicely
     if (isAIGenerated && answer.includes('\n')) {
       return answer.split('\n').map((line, index) => {
-        // Handle different sections
         if (line.startsWith('Definition:')) {
           return <p key={index} className="mb-3"><strong className="text-blue-600">Definition:</strong> {line.substring(11)}</p>;
-        }
-        if (line.startsWith('Part of Speech:')) {
-          return <p key={index} className="mb-3"><strong className="text-green-600">Part of Speech:</strong> {line.substring(15)}</p>;
         }
         if (line.startsWith('Examples:')) {
           return <p key={index} className="mb-2"><strong className="text-purple-600">Examples:</strong></p>;
         }
-        if (line.startsWith('Synonyms:')) {
-          return <p key={index} className="mb-3"><strong className="text-orange-600">Synonyms:</strong> {line.substring(9)}</p>;
-        }
-        if (line.startsWith('Etymology:')) {
-          return <p key={index} className="mb-3 text-sm italic text-gray-600"><strong>Etymology:</strong> {line.substring(10)}</p>;
-        }
-        // Numbered examples
-        if (line.match(/^\d\./)) {
-          return <li key={index} className="ml-6 mb-1 text-gray-700">{line.substring(3)}</li>;
-        }
-        // Empty lines
-        if (line.trim() === '') {
-          return null;
-        }
-        // Regular lines
         return <p key={index} className="mb-2">{line}</p>;
       });
     }
-    
+
     // For non-AI generated content, just return as is
     return <p className="text-xl text-gray-800 text-center">{answer}</p>;
   };
@@ -79,10 +78,6 @@ const Flashcard = ({ card, onRate }) => {
               {isAIGenerated && (
                 <div className="absolute top-4 right-4">
                   <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M13 7H7v6h6V7z"/>
-                      <path fillRule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2z" clipRule="evenodd"/>
-                    </svg>
                     AI Enhanced
                   </span>
                 </div>
@@ -90,12 +85,27 @@ const Flashcard = ({ card, onRate }) => {
               <h3 className="text-gray-500 text-sm uppercase tracking-wide mb-4">Question</h3>
               <p className="text-xl text-gray-800 text-center">{card.question}</p>
               {!isFlipped && (
-                <button
-                  onClick={handleFlip}
-                  className="mt-8 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
-                >
-                  Show Answer
-                </button>
+                <div className="mt-8 flex flex-col items-center gap-4">
+                  <button
+                    onClick={handleFlip}
+                    className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+                  >
+                    Show Answer
+                  </button>
+                  <button
+                    onClick={handleHint}
+                    className="px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition"
+                    disabled={loadingHint} // Disable button while loading
+                  >
+                    {loadingHint ? 'Loading Hint...' : 'Show Hint'}
+                  </button>
+                </div>
+              )}
+              {hint && (
+                <div className="mt-4 p-4 bg-gray-100 rounded-lg shadow">
+                  <h4 className="text-gray-600 text-sm uppercase tracking-wide mb-2">Hint</h4>
+                  <p className="text-gray-800">{hint}</p>
+                </div>
               )}
             </div>
           </div>

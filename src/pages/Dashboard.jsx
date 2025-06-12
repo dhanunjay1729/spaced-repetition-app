@@ -17,6 +17,7 @@ import { fetchCards } from '../utils/firestore'; // Import Firestore-based fetch
 import { getDueCards } from '../utils/spacedRepetition';
 import ErrorMessage from '../components/ErrorMessage';
 import { handleError } from '../utils/errorHandler'; // Import centralized error handler
+import LoadingSpinner from '../components/LoadingSpinner'; // Importing the LoadingSpinner component
 
 const Dashboard = () => {
     // Fetch decks using the useDecks hook
@@ -69,6 +70,10 @@ const Dashboard = () => {
 
     if (error) {
         return <ErrorMessage message={error} />;
+    }
+
+    if (loadingCards) {
+        return <LoadingSpinner />;
     }
 
     return (

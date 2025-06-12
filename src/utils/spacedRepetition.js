@@ -1,4 +1,5 @@
 import { RATING_OPTIONS } from '../data/models';
+import { addDays, startOfDay } from 'date-fns';
 
 /**
  * SM-2 Algorithm Implementation
@@ -12,11 +13,13 @@ import { RATING_OPTIONS } from '../data/models';
  * @returns {Object} Updated card properties
  */
 export const calculateSM2 = (card, quality) => {
-  console.log('Calculating SM-2 for card:', card, 'Quality:', quality); // Debugging
+  console.log('Calculating SM-2 for card:', card, 'Quality:', quality);
+
   let { interval, repetitions, easeFactor } = card;
 
+  // Adjust ease factor (EF)
   const newEaseFactor = Math.max(
-    1.3, 
+    1.3,
     easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
   );
 
@@ -24,21 +27,23 @@ export const calculateSM2 = (card, quality) => {
   let newRepetitions;
 
   if (quality < 3) {
+    // Forgot → Reset repetitions and review tomorrow
     newInterval = 1;
     newRepetitions = 0;
   } else {
+    // Remembered → Apply SM2 spacing
     if (repetitions === 0) {
-      newInterval = 1;
+      newInterval = 1; // First review → 1 day later
     } else if (repetitions === 1) {
-      newInterval = 6;
+      newInterval = 6; // Second review → 6 days later
     } else {
-      newInterval = Math.round(interval * easeFactor);
+      newInterval = Math.round(interval * easeFactor); // Subsequent reviews → EF growth
     }
     newRepetitions = repetitions + 1;
   }
 
-  const nextReviewDate = new Date();
-  nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
+  // Always set nextReview to start of day for consistency
+  const nextReviewDate = startOfDay(addDays(new Date(), newInterval));
 
   const updatedCard = {
     interval: newInterval,
@@ -48,7 +53,7 @@ export const calculateSM2 = (card, quality) => {
     lastReviewed: new Date().toISOString()
   };
 
-  console.log('Updated card properties:', updatedCard); // Debugging
+  console.log('Updated card properties:', updatedCard);
   return updatedCard;
 };
 
@@ -59,12 +64,10 @@ export const calculateSM2 = (card, quality) => {
  */
 export const getDueCards = (cards) => {
   const now = new Date();
-  now.setHours(23, 59, 59, 999); // Set to the end of today
 
   return cards.filter(card => {
     const reviewDate = new Date(card.nextReview);
-    console.log(`Card ID: ${card.id}, Next Review: ${reviewDate}, Today (end of day): ${now}`); // Debugging
-    return reviewDate <= now; // Include cards due before or exactly today
+    return reviewDate <= now; // Include cards due up to now
   });
 };
 
@@ -112,27 +115,27 @@ export const formatInterval = (interval) => {
  * @returns {Array} Rating button configurations
  */
 export const getRatingButtons = () => [
-  { 
-    rating: RATING_OPTIONS.AGAIN, 
-    label: 'Again', 
+  {
+    rating: RATING_OPTIONS.AGAIN,
+    label: 'Again',
     color: 'red',
     description: 'Complete blackout'
   },
-  { 
-    rating: RATING_OPTIONS.HARD, 
-    label: 'Hard', 
+  {
+    rating: RATING_OPTIONS.HARD,
+    label: 'Hard',
     color: 'orange',
     description: 'Difficult recall'
   },
-  { 
-    rating: RATING_OPTIONS.GOOD, 
-    label: 'Good', 
+  {
+    rating: RATING_OPTIONS.GOOD,
+    label: 'Good',
     color: 'blue',
     description: 'Correct with effort'
   },
-  { 
-    rating: RATING_OPTIONS.EASY, 
-    label: 'Easy', 
+  {
+    rating: RATING_OPTIONS.EASY,
+    label: 'Easy',
     color: 'green',
     description: 'Perfect recall'
   }
