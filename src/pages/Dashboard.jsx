@@ -7,6 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 // react-hot-toast is used for displaying toast notifications
 import { toast } from 'react-hot-toast';
+// firebase is used to access the authentication module
+import { auth } from '../firebase'; // Import Firebase auth to get the user's name
 //the hooks folder contains custom react hooks-reusable functions that 
 //let us share logic between components`
 import useDecks from '../hooks/useDecks';
@@ -26,6 +28,15 @@ const Dashboard = () => {
     // State for all cards
     const [allCards, setAllCards] = useState([]);
     const [loadingCards, setLoadingCards] = useState(true);
+    const [userName, setUserName] = useState(''); // State to store the user's name
+
+    // Fetch the user's name from Firebase Auth
+    useEffect(() => {
+        const currentUser = auth.currentUser;
+        if (currentUser && currentUser.displayName) {
+            setUserName(currentUser.displayName);
+        }
+    }, []);
 
     // Fetch all cards from Firestore
     useEffect(() => {
@@ -57,14 +68,16 @@ const Dashboard = () => {
 
     // Deck deletion handler
     const handleDeleteDeck = async (deckId, event) => {
-        event.stopPropagation();
-        if (window.confirm('Are you sure you want to delete this deck?')) {
-            try {
-                await deleteDeck(deckId);
-                toast('Deck deleted', { icon: '🗑️' });
-            } catch (err) {
-                handleError(err, 'Dashboard - handleDeleteDeck'); // Use centralized error handler
-            }
+        try {
+            event?.stopPropagation(); // Ensure event is passed
+            const confirmDelete = window.confirm('Are you sure you want to delete this deck?');
+            if (!confirmDelete) return;
+
+            await deleteDeck(deckId);
+            toast.success('Deck deleted successfully!', { icon: '🗑️' });
+        } catch (err) {
+            handleError(err, 'Dashboard - handleDeleteDeck');
+            toast.error('Failed to delete deck. Please try again.');
         }
     };
 
@@ -79,7 +92,7 @@ const Dashboard = () => {
     return (
         <div className="container mx-auto p-6 max-w-6xl">
             <h1 className="text-4xl font-extrabold mb-10 text-center text-gray-800">
-                Welcome to Your Dashboard
+                Welcome to Your Dashboard{userName ? `, ${userName}` : ''}
             </h1>
             {/* Statistics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">

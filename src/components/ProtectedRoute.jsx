@@ -1,14 +1,17 @@
+// components/ProtectedRoute.jsx
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import LoadingSpinner from './LoadingSpinner';
 
-const ProtectedRoute = ({ children }) => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
+const ProtectedRoute = () => {
+  const { isAuthenticated, loading } = useAuth();
 
-    if (!isLoggedIn) {
-        return <Navigate to="/login" />;
-    }
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
-    return children;
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;
