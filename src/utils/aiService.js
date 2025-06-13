@@ -4,10 +4,7 @@ import { auth } from '../firebase';
 class AIService {
   constructor() {
     this.apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
-    console.log('AI Service initialized:');
     console.log('API key present:', !!this.apiKey);
-    console.log('API key starts with sk-:', this.apiKey?.startsWith('sk-'));
   }
 
   async processUserQuery(input) {
