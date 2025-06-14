@@ -101,7 +101,6 @@ const Header = () => {
                 My Decks
               </Link>
               <div className="pt-2 border-t border-gray-200">
-                <p className="text-sm text-gray-600 mb-2">{user?.email}</p>
                 <button
                   onClick={() => {
                     handleLogout();
