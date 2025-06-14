@@ -14,6 +14,7 @@ const Signup = lazy(() => import('./pages/Signup'));
 const DeckManager = lazy(() => import('./pages/DeckManager'));
 const DeckDetail = lazy(() => import('./pages/DeckDetail'));
 const StudySession = lazy(() => import('./pages/StudySession'));
+const Help = lazy(() => import('./pages/Help'));
 
 function App() {
   return (
@@ -21,12 +22,14 @@ function App() {
       <div className="min-h-screen bg-gray-50">
         <Header />
         <Toaster position="top-right" />
+        
         <main className="pt-16">
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
               {/* Public routes */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/help" element={<Help />} />
               
               {/* Protected routes */}
               <Route element={<ProtectedRoute />}>

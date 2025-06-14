@@ -8,7 +8,7 @@ import { Menu, X } from 'lucide-react';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -38,6 +38,9 @@ const Header = () => {
 
         {/* Navigation - Desktop */}
         <nav className="hidden md:flex items-center gap-6">
+          <Link to="/help" className="hover:underline">
+            Help
+          </Link>
           {isAuthenticated ? (
             <>
               <Link to="/dashboard" className="hover:underline">
@@ -46,12 +49,14 @@ const Header = () => {
               <Link to="/decks" className="hover:underline">
                 My Decks
               </Link>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 rounded hover:bg-red-700"
-              >
-                Logout
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-red-600 rounded hover:bg-red-700"
+                >
+                  Logout
+                </button>
+              </div>
             </>
           ) : (
             <>
@@ -72,6 +77,13 @@ const Header = () => {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden bg-white text-gray-800 shadow-md px-4 py-4 space-y-4">
+          <Link
+            to="/help"
+            onClick={() => setMenuOpen(false)}
+            className="block hover:text-blue-600"
+          >
+            Help
+          </Link>
           {isAuthenticated ? (
             <>
               <Link
@@ -88,15 +100,18 @@ const Header = () => {
               >
                 My Decks
               </Link>
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setMenuOpen(false);
-                }}
-                className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded"
-              >
-                Logout
-              </button>
+              <div className="pt-2 border-t border-gray-200">
+                <p className="text-sm text-gray-600 mb-2">{user?.email}</p>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMenuOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded"
+                >
+                  Logout
+                </button>
+              </div>
             </>
           ) : (
             <>
@@ -110,7 +125,7 @@ const Header = () => {
               <Link
                 to="/signup"
                 onClick={() => setMenuOpen(false)}
-                className="block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-center"
               >
                 Sign Up
               </Link>

@@ -18,7 +18,7 @@ const Signup = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate('/help');
     }
   }, [isAuthenticated, navigate]);
 
@@ -54,7 +54,7 @@ const Signup = () => {
       });
 
       toast.success('Account created successfully!');
-      navigate('/dashboard');
+      navigate('/help');
     } catch (error) {
       console.error('Signup error:', error);
       if (error.code === 'auth/email-already-in-use') {
