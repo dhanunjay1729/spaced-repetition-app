@@ -8,6 +8,7 @@ import { getDueCards } from '../utils/spacedRepetition';
 import ErrorMessage from '../components/ErrorMessage';
 import { handleError } from '../utils/errorHandler';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { confirmAlert } from 'react-confirm-alert';
 
 const Dashboard = () => {
   const { decks, error, deleteDeck } = useDecks();
@@ -43,16 +44,32 @@ const Dashboard = () => {
     return nextReview === today;
   }).length;
 
-  const handleDeleteDeck = async (deckId, e) => {
-    try {
-      e?.stopPropagation();
-      if (!window.confirm('Delete this deck?')) return;
-      await deleteDeck(deckId);
-      toast.success('Deck deleted!', { icon: '🗑️' });
-    } catch (err) {
-      handleError(err, 'Dashboard - handleDeleteDeck');
-      toast.error('Could not delete deck.');
-    }
+  const handleDeleteDeck = (deckId, e) => {
+    e?.stopPropagation(); // Prevent event bubbling
+
+    confirmAlert({
+      title: 'Confirm Deck Deletion',
+      message: 'Are you sure you want to delete this deck? All cards will be lost!',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: async () => {
+            try {
+              await deleteDeck(deckId); // Call the delete function
+              toast.success('Deck deleted successfully!', { icon: '🗑️' });
+            } catch (err) {
+              handleError(err, 'Dashboard - handleDeleteDeck');
+              toast.error('Failed to delete deck!');
+            }
+          },
+          className: 'confirm-yes-button', // Use the custom CSS class for the "Yes" button
+        },
+        {
+          label: 'No',
+          onClick: () => toast('Deletion canceled'),
+        },
+      ],
+    });
   };
 
   if (error) return <ErrorMessage message={error} />;

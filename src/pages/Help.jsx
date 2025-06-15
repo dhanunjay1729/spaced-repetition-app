@@ -1,7 +1,7 @@
 // pages/Help.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, ChevronUp, Brain, Clock, BarChart, Star, RefreshCw, BookOpen } from 'lucide-react';
+import { ChevronDown, ChevronUp, Brain, Clock, BarChart, Star, RefreshCw, BookOpen, Zap } from 'lucide-react';
 
 const Help = () => {
   const [openSection, setOpenSection] = useState('what-is-sr');
@@ -278,6 +278,24 @@ const Help = () => {
             As you consistently review cards, you'll see them move from "New" → "Learning" → "Learned", 
             indicating successful long-term memorization.
           </p>
+        </div>
+      </Section>
+
+      <Section id="ai-features" title="AI-Powered Features" icon={Zap}>
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-semibold text-gray-800 mb-2">AI-Generated Flashcards</h4>
+            <p className="text-gray-700">
+              Save time by letting AI generate flashcards for you. Simply provide a word or question, and the AI will automatically understand the context—whether it's a new vocabulary word, a medical term, or a complex question—and create a detailed card with definitions, examples, and more.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold text-gray-800 mb-2">Text Extraction from Images</h4>
+            <p className="text-gray-700">
+              Add cards effortlessly by uploading an image. The AI extracts text from the image and intelligently uses it as the card's content, making it easy to digitize handwritten or printed notes without requiring manual input.
+            </p>
+          </div>
         </div>
       </Section>
 

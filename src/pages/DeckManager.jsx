@@ -9,7 +9,7 @@ import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 
 const DeckManager = () => {
-  const { decks, loading, error, addDeck, removeDeck } = useDecks();
+  const { decks, loading, error, addDeck, deleteDeck } = useDecks();
   const [showForm, setShowForm] = useState(false);
   const [cardCounts, setCardCounts] = useState({});
   const [loadingCards, setLoadingCards] = useState(true);
@@ -24,7 +24,7 @@ const DeckManager = () => {
         }, {});
         setCardCounts(counts);
       } catch (err) {
-        handleError(err, 'DeckManager - fetchCardCounts');
+        console.error('Error fetching card counts:', err);
       } finally {
         setLoadingCards(false);
       }
@@ -45,7 +45,7 @@ const DeckManager = () => {
     }
   };
 
-  const handleDeleteDeck = async (deckId) => {
+  const handleDeleteDeck = (deckId) => {
     confirmAlert({
       title: 'Confirm Deck Deletion',
       message: 'Are you sure you want to delete this deck? All cards will be lost!',
@@ -54,9 +54,10 @@ const DeckManager = () => {
           label: 'Yes',
           onClick: async () => {
             try {
-              await removeDeck(deckId);
-              toast.success('Deck deleted!');
+              await deleteDeck(deckId); // Call the delete function
+              toast.success('Deck deleted successfully!', { icon: '🗑️' });
             } catch (err) {
+              console.error('Error deleting deck:', err);
               toast.error('Failed to delete deck!');
             }
           },

@@ -73,12 +73,13 @@ const DeckDetail = () => {
                     label: 'Yes',
                     onClick: async () => {
                         try {
-                            deleteCard(cardId);
-                            toast('Card deleted', { icon: '🗑️' });
+                            await deleteCard(cardId); // Call the delete function
+                            toast.success('Card deleted successfully!', { icon: '🗑️' });
                         } catch (err) {
                             toast.error('Failed to delete card!');
                         }
                     },
+                    className: 'confirm-yes-button', // Use the custom CSS class for the "Yes" button
                 },
                 {
                     label: 'No',
