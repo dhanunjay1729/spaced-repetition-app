@@ -127,8 +127,8 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
           name="answer"
           value={formData.answer}
           onChange={handleChange}
-          className="w-full border rounded px-3 py-2"
-          rows="8"
+          className="w-full border rounded px-3 py-2 sm:w-3/4 lg:w-2/3 min-h-[300px] sm:min-h-[350px] lg:min-h-[450px]"
+          rows="12"
           required
         />
         <input
