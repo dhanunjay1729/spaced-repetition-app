@@ -37,7 +37,7 @@ export const calculateSM2 = (card, quality) => {
     } else if (repetitions === 1) {
       newInterval = 6; // Second review → 6 days later
     } else {
-      newInterval = Math.round(interval * easeFactor); // Subsequent reviews → EF growth
+      newInterval = Math.round(interval * newEaseFactor);  // Subsequent reviews → EF growth
     }
     newRepetitions = repetitions + 1;
   }
