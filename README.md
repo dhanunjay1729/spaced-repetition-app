@@ -1,70 +1,97 @@
-# Spaced Repetition App
+# Spaced Repetition App - AI-Enhanced Flashcard Study Tool
 
-A web application for efficient flashcard study built with React, Vite and Firebase. It implements the SM-2 spaced-repetition algorithm and integrates with OpenAI to generate hints and process user queries.
+An intelligent flashcard study application that uses spaced repetition algorithms and AI to optimize learning efficiency. Built with modern web technologies and enhanced with OpenAI integration for smarter study experiences.
 
-## Features
+## ✨ Features
 
-- **User authentication** with Firebase
-- **Deck and card management** with Firestore persistence
-- **Study sessions** scheduled using the SM-2 algorithm
-- **AI assistant** for hints, adaptive responses and image text extraction
-- **Responsive UI** styled with Tailwind CSS and framer-motion
+- **Spaced Repetition Algorithm**: Implements SM-2 algorithm for optimal learning intervals
+- **AI-Powered Hints**: Contextual hints and explanations powered by OpenAI API
+- **Image Text Extraction**: Extract text from images using AI for easy flashcard creation
+- **Real-time Synchronization**: Cross-device sync with Firebase backend
+- **Modern UI**: Smooth animations and responsive design with Framer Motion
+- **Progress Tracking**: Visual analytics of learning progress and retention rates
 
-## Getting Started
+## 🛠️ Tech Stack
 
-### Prerequisites
+- **Frontend**: React.js, Vite
+- **Styling**: TailwindCSS
+- **Animations**: Framer Motion
+- **State Management**: Zustand
+- **Backend**: Firebase (Authentication, Firestore, Functions)
+- **AI Integration**: OpenAI API
+- **Deployment**: Vercel
 
-- Node.js 18 or later
-- A Firebase project with Firestore enabled
-- An OpenAI API key
+## 🎯 How It Works
 
-### Installation
+1. **Smart Scheduling**: Uses SM-2 algorithm to schedule card reviews based on performance
+2. **AI Assistance**: Get contextual hints and explanations when struggling with concepts
+3. **Image Processing**: Upload images and extract text automatically for flashcard creation
+4. **Progress Analytics**: Track learning efficiency and retention patterns
+5. **Cross-Device Sync**: Study seamlessly across multiple devices
 
-1. Clone the repository
-   ```bash
-   git clone <repository-url>
-   cd spaced-repetition-app
-   ```
-2. Install dependencies
-   ```bash
-   npm install
-   ```
-3. Create a `.env` file in the project root with the following variables
-   ```
-   VITE_FIREBASE_API_KEY=your-key
-   VITE_FIREBASE_AUTH_DOMAIN=your-auth-domain
-   VITE_FIREBASE_PROJECT_ID=your-project-id
-   VITE_FIREBASE_STORAGE_BUCKET=your-storage-bucket
-   VITE_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-   VITE_FIREBASE_APP_ID=your-app-id
-   VITE_FIREBASE_MEASUREMENT_ID=your-measurement-id
-   VITE_OPENAI_API_KEY=your-openai-key
-   # Optional: specify a model
-   VITE_OPENAI_MODEL=gpt-4o
-   ```
-4. Start the development server
-   ```bash
-   npm run dev
-   ```
+## 🧠 SM-2 Algorithm Explained
 
-The application will be available at `http://localhost:5173` by default.
+The SM-2 (SuperMemo 2) algorithm is a spaced repetition method that optimizes learning by scheduling reviews based on your performance:
 
-### Available Scripts
+### How it works:
+1. **Initial Learning**: New cards start with short intervals (1-3 days)
+2. **Performance Rating**: After each review, rate your recall difficulty (1-5 scale)
+3. **Interval Calculation**: 
+   - Good performance → longer intervals (exponential growth)
+   - Poor performance → reset to shorter intervals
+4. **Easiness Factor**: Each card has an "easiness" score that adjusts based on your performance history
 
-- `npm run dev` – start a local dev server
-- `npm run build` – build for production
-- `npm run preview` – preview the production build
-- `npm run lint` – run ESLint
+### The Math Behind It:
+- **Easy cards**: Next interval = Previous interval × Easiness Factor (typically 2.5+)
+- **Difficult cards**: Interval resets to 1 day, easiness factor decreases
+- **Optimal timing**: Reviews happen just before you're likely to forget
 
-## Project Structure
+### Why It Works:
+- **Forgetting Curve**: Leverages psychological research on memory retention
+- **Personalized**: Adapts to your individual learning patterns
+- **Efficient**: Maximizes retention while minimizing study time
+- **Long-term Focus**: Builds permanent memory rather than cramming
 
-- `src/` – React components, pages and utilities
-- `src/utils/spacedRepetition.js` – SM-2 algorithm implementation
-- `src/utils/aiService.js` – OpenAI integration
-- `functions/` – Firebase Cloud Functions
+This algorithm ensures you spend more time on difficult concepts while maintaining knowledge of easier material with minimal effort.
 
-## Deployment
+## 📱 Usage
 
-Run `npm run build` to generate the `build` directory. Deploy it to Firebase Hosting or another static hosting provider.
+- Create flashcard decks for different subjects
+- Study with spaced repetition scheduling
+- Get AI-powered hints when needed
+- Extract text from images for quick card creation
+- Track your learning progress over time
+
+## 🔧 Key Features Implemented
+
+- User authentication and profile management
+- Flashcard creation and editing interface
+- SM-2 spaced repetition algorithm
+- Firebase real-time database integration
+- OpenAI API integration for hints
+- Image text extraction functionality
+- Progress tracking and analytics
+- Responsive design with smooth animations
+
+## 🚀 Live Demo
+
+Check out the live application: [Spaced Repetition App](https://spaced-repetition-app-ecru.vercel.app)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 👨‍💻 Author
+
+**Dhanunjay Panta**
+- GitHub: [@dhanunjay1729](https://github.com/dhanunjay1729)
+- LinkedIn: [dhanunjaypanta](https://linkedin.com/in/dhanunjaypanta)
+- Portfolio: [dhanunjay.vercel.app](https://dhanunjay.vercel.app)
 
 ---
+
+*Built with ❤️ to make studying more efficient and effective*
