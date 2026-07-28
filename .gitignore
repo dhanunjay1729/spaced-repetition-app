@@ -3,3 +3,6 @@ dist/
 .env
 .DS_Store
 .vercel
+.understand-anything/
+src.zip
+functions/.env
