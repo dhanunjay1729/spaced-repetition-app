@@ -6,6 +6,7 @@ import Header from './components/Header';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import './App.css';
 
 // Lazy load pages for better performance
@@ -20,8 +21,9 @@ const Quiz = lazy(() => import('./pages/Quiz'));
 
 function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-surface-50 dark:bg-surface-900 transition-colors duration-300">
         <Header />
         <Toaster position="top-right" />
         
@@ -49,6 +51,7 @@ function App() {
         </main>
       </div>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 

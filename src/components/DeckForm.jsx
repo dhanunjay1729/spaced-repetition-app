@@ -30,38 +30,40 @@ const DeckForm = ({ onSubmit, onCancel, initialData }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="glass-elevated rounded-2xl p-6 space-y-4">
             <div>
-                <label className="block mb-1 font-medium">Deck Name</label>
+                <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200 text-sm">Deck Name</label>
                 <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full border rounded px-3 py-2"
+                    className="input-field"
+                    placeholder="e.g., Biology Chapter 5"
                     required
                 />
             </div>
             <div>
-                <label className="block mb-1 font-medium">Description</label>
+                <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200 text-sm">Description</label>
                 <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    className="w-full border rounded px-3 py-2"
+                    className="input-field min-h-[80px]"
+                    placeholder="Optional description..."
                 />
             </div>
-            <div className="flex gap-4">
+            <div className="flex gap-3">
                 <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    className="btn-primary text-sm"
                 >
                     {initialData ? 'Update Deck' : 'Create Deck'}
                 </button>
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                    className="btn-secondary text-sm"
                 >
                     Cancel
                 </button>

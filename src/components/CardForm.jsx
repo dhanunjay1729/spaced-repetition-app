@@ -96,16 +96,16 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="glass-elevated rounded-2xl p-6 space-y-4">
       <div>
-        <label className="block mb-1 font-medium">Question</label>
+        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200 text-sm">Question</label>
         <div className="flex gap-2">
           <input
             type="text"
             name="question"
             value={formData.question}
             onChange={handleChange}
-            className="flex-1 border rounded px-3 py-2"
+            className="flex-1 input-field"
             placeholder="Enter a word or question"
             required
             maxLength={MAX_QUESTION_LENGTH}
@@ -114,43 +114,43 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
             type="button"
             onClick={handleAIGenerate}
             disabled={isGenerating}
-            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-purple-400 flex items-center gap-2"
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-brand-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-brand-600 disabled:opacity-50 transition-all active:scale-[0.97] text-sm whitespace-nowrap"
           >
-            {isGenerating ? 'Generating...' : 'AI Generate'}
+            {isGenerating ? 'Generating...' : '✨ AI Generate'}
           </button>
         </div>
       </div>
 
       <div>
-        <label className="block mb-1 font-medium">Answer</label>
+        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200 text-sm">Answer</label>
         <textarea
           name="answer"
           value={formData.answer}
           onChange={handleChange}
-          className="w-full border rounded px-3 py-2 sm:w-3/4 lg:w-2/3 min-h-[300px] sm:min-h-[350px] lg:min-h-[450px]"
-          rows="12"
+          className="input-field min-h-[200px] sm:min-h-[300px]"
+          rows="8"
           required
         />
         <input
           type="file"
           accept="image/*"
           onChange={handleImageToText}
-          className="mt-2 text-sm text-gray-500"
+          className="mt-2 text-sm text-gray-500 dark:text-gray-400 file:mr-3 file:py-1.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-brand-50 file:dark:bg-brand-500/20 file:text-brand-600 file:dark:text-brand-300 file:cursor-pointer hover:file:bg-brand-100 dark:hover:file:bg-brand-500/30 file:transition-colors"
         />
-        {isExtracting && <p className="text-sm text-gray-500 mt-1">Extracting text...</p>}
+        {isExtracting && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Extracting text...</p>}
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-3">
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="btn-primary text-sm"
         >
           {initialData ? 'Update Card' : 'Add Card'}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+          className="btn-secondary text-sm"
         >
           Cancel
         </button>

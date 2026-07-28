@@ -45,34 +45,37 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-black flex items-center justify-center">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 space-y-6">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      {/* Background gradient overlay */}
+      <div className="fixed inset-0 bg-gradient-to-br from-brand-950 via-surface-900 to-purple-950 -z-10" />
+
+      <div className="max-w-md w-full glass-elevated rounded-2xl p-8 space-y-6 animate-scale-in">
         {/* Motivational Quote */}
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-white">
             "Master your memory with Spaced Repetition."
           </h1>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-gray-400 mt-2">
             Learn smarter, not harder.
           </p>
         </div>
 
         {/* Login Form */}
         <div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-extrabold text-white">
             Log in to your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-400">
             Or{' '}
-            <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link to="/signup" className="font-medium text-brand-400 hover:text-brand-300 transition-colors">
               create a new account
             </Link>
           </p>
         </div>
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email-address" className="block text-sm font-medium text-gray-300 mb-1">
                 Email address
               </label>
               <input
@@ -81,14 +84,14 @@ const Login = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="input-field"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
                 Password
               </label>
               <input
@@ -97,7 +100,7 @@ const Login = () => {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="input-field"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -109,7 +112,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Logging in...' : 'Log in'}
             </button>

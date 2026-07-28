@@ -97,32 +97,42 @@ const StudySession = () => {
   }
 
   if (sessionComplete) {
+    const percentage = sessionStats.total > 0 ? Math.round((sessionStats.correct / sessionStats.total) * 100) : 0;
     return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold mb-4">Session Complete!</h2>
-        <p className="mb-4">
-          You answered {sessionStats.completed} cards. Correct: {sessionStats.correct}
-        </p>
-        <Link
-          to={`/deck/${deckId}`}
-          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Back to Deck
-        </Link>
+      <div className="min-h-[60vh] flex items-center justify-center p-6">
+        <div className="glass-elevated rounded-2xl p-8 max-w-md w-full text-center animate-scale-in">
+          <div className="text-5xl mb-4">🎉</div>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Session Complete!</h2>
+          <div className={`text-5xl font-extrabold my-4 ${percentage >= 70 ? 'text-emerald-500' : percentage >= 40 ? 'text-orange-500' : 'text-red-500'}`}>
+            {percentage}%
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
+            {sessionStats.correct} of {sessionStats.completed} cards recalled correctly
+          </p>
+          <Link
+            to={`/deck/${deckId}`}
+            className="btn-primary inline-block"
+          >
+            Back to Deck
+          </Link>
+        </div>
       </div>
     );
   }
 
   if (!sessionCards.length) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 mb-4">No cards due for review in this deck.</p>
-        <Link
-          to={`/deck/${deckId}`}
-          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Back to Deck
-        </Link>
+      <div className="min-h-[60vh] flex items-center justify-center p-6">
+        <div className="glass-elevated rounded-2xl p-8 max-w-md w-full text-center animate-fade-in">
+          <div className="text-4xl mb-4">✅</div>
+          <p className="text-gray-500 dark:text-gray-400 mb-6 text-lg">No cards due for review in this deck.</p>
+          <Link
+            to={`/deck/${deckId}`}
+            className="btn-primary inline-block"
+          >
+            Back to Deck
+          </Link>
+        </div>
       </div>
     );
   }
@@ -130,18 +140,29 @@ const StudySession = () => {
   const card = sessionCards[currentIndex];
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Study Session</h1>
-        <span className="text-gray-600">
-          Card {currentIndex + 1} of {sessionCards.length}
-        </span>
+    <div className="container mx-auto p-6 max-w-2xl">
+      {/* Progress header */}
+      <div className="mb-6 flex justify-between items-center animate-fade-in">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Study Session</h1>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+            {currentIndex + 1} / {sessionCards.length}
+          </span>
+          <div className="w-24 bg-gray-200 dark:bg-white/10 rounded-full h-2">
+            <div
+              className="bg-gradient-to-r from-brand-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${((currentIndex + 1) / sessionCards.length) * 100}%` }}
+            />
+          </div>
+        </div>
       </div>
+
       <Flashcard card={card} onRate={handleRate} />
+
       <div className="mt-8 text-center">
         <Link
           to={`/deck/${deckId}`}
-          className="text-blue-600 hover:text-blue-700"
+          className="text-gray-400 dark:text-gray-500 hover:text-red-400 dark:hover:text-red-400 transition-colors text-sm"
         >
           Cancel Session
         </Link>

@@ -72,34 +72,37 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-800 via-pink-700 to-red-600 flex items-center justify-center">
-      <div className="max-w-lg w-full bg-white rounded-lg shadow-lg p-8 space-y-6">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      {/* Background gradient overlay */}
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-950 via-surface-900 to-brand-950 -z-10" />
+
+      <div className="max-w-lg w-full glass-elevated rounded-2xl p-8 space-y-6 animate-scale-in">
         {/* Motivational Quote */}
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-white">
             "Unlock your potential with Spaced Repetition."
           </h1>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-gray-400 mt-2">
             Build habits that last a lifetime.
           </p>
         </div>
 
         {/* Signup Form */}
         <div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-extrabold text-white">
             Create your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-400">
             Or{' '}
-            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link to="/login" className="font-medium text-brand-400 hover:text-brand-300 transition-colors">
               log in to your account
             </Link>
           </p>
         </div>
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
                 Name
               </label>
               <input
@@ -108,14 +111,14 @@ const Signup = () => {
                 type="text"
                 autoComplete="name"
                 required
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="input-field"
                 placeholder="John Doe"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email-address" className="block text-sm font-medium text-gray-300 mb-1">
                 Email address
               </label>
               <input
@@ -124,14 +127,14 @@ const Signup = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="input-field"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
                 Password
               </label>
               <input
@@ -140,14 +143,14 @@ const Signup = () => {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="input-field"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-300 mb-1">
                 Confirm Password
               </label>
               <input
@@ -156,7 +159,7 @@ const Signup = () => {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="input-field"
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -168,7 +171,7 @@ const Signup = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating account...' : 'Sign up'}
             </button>

@@ -68,14 +68,14 @@ const Flashcard = ({ card, onRate }) => {
         if (line.startsWith('Definition:')) {
           return (
             <div key={index} className="mb-2">
-              <strong className="text-blue-600">Definition:</strong> {line.substring(11)}
+              <strong className="text-brand-500">Definition:</strong> {line.substring(11)}
             </div>
           );
         }
         if (line.startsWith('Examples:')) {
           return (
             <div key={index} className="mb-2">
-              <strong className="text-purple-600">Examples:</strong>
+              <strong className="text-purple-500">Examples:</strong>
             </div>
           );
         }
@@ -110,29 +110,29 @@ const Flashcard = ({ card, onRate }) => {
         >
           {/* Front of card (Question) */}
           <div className="absolute inset-0 w-full h-full backface-hidden">
-            <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8 h-full flex flex-col justify-center relative overflow-y-auto">
+            <div className="glass-elevated rounded-2xl p-4 sm:p-6 md:p-8 h-full flex flex-col justify-center relative overflow-y-auto">
               {isAIGenerated && (
                 <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
-                  <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-brand-100 dark:bg-brand-500/20 text-brand-700 dark:text-brand-300 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     AI Enhanced
                   </span>
                 </div>
               )}
-              <h3 className="text-gray-500 text-sm uppercase tracking-wide mb-4 text-center">Question</h3>
-              <div className="text-base sm:text-lg md:text-xl text-gray-800 text-center flex-grow flex items-center justify-center">
+              <h3 className="text-gray-400 dark:text-gray-500 text-sm uppercase tracking-wide mb-4 text-center font-medium">Question</h3>
+              <div className="text-base sm:text-lg md:text-xl text-gray-800 dark:text-gray-100 text-center flex-grow flex items-center justify-center">
                 <div className="w-full">{formatQuestion(card.question)}</div>
               </div>
               {!isFlipped && (
                 <div className="mt-6 flex flex-col items-center gap-3">
                   <button
                     onClick={handleFlip}
-                    className="px-5 py-2.5 sm:px-6 sm:py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition text-sm sm:text-base"
+                    className="btn-primary text-sm sm:text-base"
                   >
                     Show Answer
                   </button>
                   <button
                     onClick={handleHint}
-                    className="px-5 py-2.5 sm:px-6 sm:py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition text-sm sm:text-base"
+                    className="btn-secondary text-sm sm:text-base"
                     disabled={loadingHint}
                   >
                     {loadingHint ? 'Loading Hint...' : 'Show Hint'}
@@ -140,9 +140,9 @@ const Flashcard = ({ card, onRate }) => {
                 </div>
               )}
               {hint && (
-                <div className="mt-4 p-3 sm:p-4 bg-gray-100 rounded-lg shadow max-h-32 overflow-y-auto">
-                  <h4 className="text-gray-600 text-sm uppercase tracking-wide mb-2">Hint</h4>
-                  <p className="text-gray-800 text-sm sm:text-base">{hint}</p>
+                <div className="mt-4 p-3 sm:p-4 glass rounded-xl max-h-32 overflow-y-auto">
+                  <h4 className="text-gray-500 dark:text-gray-400 text-sm uppercase tracking-wide mb-2 font-medium">Hint</h4>
+                  <p className="text-gray-800 dark:text-gray-200 text-sm sm:text-base">{hint}</p>
                 </div>
               )}
             </div>
@@ -150,9 +150,9 @@ const Flashcard = ({ card, onRate }) => {
 
           {/* Back of card (Answer) */}
           <div className="absolute inset-0 w-full h-full rotate-y-180 backface-hidden">
-            <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 md:p-8 h-full overflow-y-auto">
-              <h3 className="text-gray-500 text-sm uppercase tracking-wide mb-4 text-center">Answer</h3>
-              <div className={`text-base sm:text-lg md:text-xl text-gray-800 ${isAIGenerated ? 'text-left' : 'text-center'}`}>
+            <div className="glass-elevated rounded-2xl p-4 sm:p-6 md:p-8 h-full overflow-y-auto">
+              <h3 className="text-gray-400 dark:text-gray-500 text-sm uppercase tracking-wide mb-4 text-center font-medium">Answer</h3>
+              <div className={`text-base sm:text-lg md:text-xl text-gray-800 dark:text-gray-100 ${isAIGenerated ? 'text-left' : 'text-center'}`}>
                 {formatAnswer(card.answer)}
               </div>
             </div>
@@ -162,40 +162,40 @@ const Flashcard = ({ card, onRate }) => {
 
       {/* Rating buttons */}
       {showRating && (
-        <div className="mt-6 sm:mt-8 space-y-4">
-          <p className="text-center text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">How well did you remember?</p>
+        <div className="mt-6 sm:mt-8 space-y-4 animate-slide-up">
+          <p className="text-center text-gray-500 dark:text-gray-400 mb-3 sm:mb-4 text-sm sm:text-base">How well did you remember?</p>
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <button
               onClick={() => handleRate(0)}
-              className="px-4 py-3 sm:px-6 sm:py-4 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 transition"
+              className="px-4 py-3 sm:px-6 sm:py-4 bg-red-500/90 hover:bg-red-600 text-white font-medium rounded-xl transition-all active:scale-[0.97]"
             >
               <span className="block text-base sm:text-lg">Again</span>
-              <span className="block text-xs sm:text-sm opacity-80">Didn't remember</span>
+              <span className="block text-xs sm:text-sm opacity-70">Didn't remember</span>
             </button>
             <button
               onClick={() => handleRate(3)}
-              className="px-4 py-3 sm:px-6 sm:py-4 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 transition"
+              className="px-4 py-3 sm:px-6 sm:py-4 bg-orange-500/90 hover:bg-orange-600 text-white font-medium rounded-xl transition-all active:scale-[0.97]"
             >
               <span className="block text-base sm:text-lg">Hard</span>
-              <span className="block text-xs sm:text-sm opacity-80">Difficult recall</span>
+              <span className="block text-xs sm:text-sm opacity-70">Difficult recall</span>
             </button>
             <button
               onClick={() => handleRate(4)}
               disabled={hintUsed}
-              className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-lg transition ${hintUsed ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
+              className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-xl transition-all active:scale-[0.97] ${hintUsed ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-brand-500/90 hover:bg-brand-600'}`}
             >
               <span className="block text-base sm:text-lg">Good</span>
-              <span className="block text-xs sm:text-sm opacity-80">
+              <span className="block text-xs sm:text-sm opacity-70">
                 {hintUsed ? 'Disabled (Hint used)' : 'Recalled with effort'}
               </span>
             </button>
             <button
               onClick={() => handleRate(5)}
               disabled={hintUsed || timeTaken > 15000}
-              className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-lg transition ${hintUsed || timeTaken > 15000 ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
+              className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-xl transition-all active:scale-[0.97] ${hintUsed || timeTaken > 15000 ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-emerald-500/90 hover:bg-emerald-600'}`}
             >
               <span className="block text-base sm:text-lg">Easy</span>
-              <span className="block text-xs sm:text-sm opacity-80">
+              <span className="block text-xs sm:text-sm opacity-70">
                 {hintUsed ? 'Disabled (Hint used)' : (timeTaken > 15000 ? 'Disabled (>15s thought)' : 'Perfect recall')}
               </span>
             </button>

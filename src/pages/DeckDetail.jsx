@@ -101,19 +101,19 @@ const DeckDetail = () => {
     return (
         <div className="container mx-auto p-6 max-w-5xl">
             {/* Header */}
-            <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in">
                 <div>
                     <Link
                         to="/decks"
-                        className="text-blue-600 hover:text-blue-700 mb-2 inline-block"
+                        className="text-brand-500 hover:text-brand-600 mb-2 inline-block transition-colors text-sm font-medium"
                     >
                         ← Back to Decks
                     </Link>
-                    <h1 className="text-4xl font-extrabold mb-1 text-gray-800">{deck.name}</h1>
+                    <h1 className="text-4xl font-extrabold mb-1 text-gray-800 dark:text-white">{deck.name}</h1>
                     {deck.description && (
-                        <p className="text-lg text-gray-600 mb-1">{deck.description}</p>
+                        <p className="text-lg text-gray-500 dark:text-gray-400 mb-1">{deck.description}</p>
                     )}
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-400 dark:text-gray-500">
                         {cards.length} {cards.length === 1 ? 'card' : 'cards'}
                     </p>
                 </div>
@@ -121,7 +121,7 @@ const DeckDetail = () => {
                     {cards.length > 0 && (
                         <Link
                             to={`/study/${deckId}`}
-                            className="px-6 py-2 bg-gradient-to-r from-green-500 to-green-700 text-white font-medium rounded-lg shadow hover:shadow-lg transition"
+                            className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-medium rounded-xl shadow-lg shadow-emerald-500/25 hover:shadow-xl transition-all active:scale-[0.98]"
                         >
                             Study Now
                         </Link>
@@ -132,7 +132,7 @@ const DeckDetail = () => {
                                 setShowForm(true);
                                 setEditingCard(null);
                             }}
-                            className="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-medium rounded-lg shadow hover:shadow-lg transition"
+                            className="btn-primary text-sm"
                         >
                             + Add Card
                         </button>
@@ -147,7 +147,7 @@ const DeckDetail = () => {
             )}
             {/* Card Form */}
             {showForm && (
-                <div className="mb-8">
+                <div className="mb-8 animate-slide-up">
                     <CardForm
                         onSubmit={editingCard ? handleUpdateCard : handleCreateCard}
                         onCancel={() => {
@@ -160,17 +160,18 @@ const DeckDetail = () => {
             )}
             {/* Cards Display */}
             {!showForm && cards.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-lg shadow-lg">
-                    <p className="text-gray-500 mb-4 text-lg">No cards in this deck yet.</p>
+                <div className="text-center py-16 glass-elevated rounded-2xl animate-fade-in">
+                    <div className="text-4xl mb-4">🃏</div>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4 text-lg">No cards in this deck yet.</p>
                     <button
                         onClick={() => setShowForm(true)}
-                        className="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-700 text-white font-medium rounded-lg hover:shadow-lg transition"
+                        className="btn-primary text-sm"
                     >
                         Create your first card
                     </button>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     {cards.map(card => {
                         console.log('Rendering card:', card.id, 'Flipped state:', flippedCards[card.id]); // Debugging
                         return (
@@ -180,8 +181,10 @@ const DeckDetail = () => {
                                     console.log('Card clicked:', card.id); // Debugging
                                     handleFlipCard(card.id);
                                 }}
-                                className={`relative p-6 rounded-xl shadow-lg hover:shadow-2xl transition flex flex-col items-center cursor-pointer ${
-                                    flippedCards[card.id] ? 'bg-green-100' : 'bg-red-100'
+                                className={`relative p-6 rounded-2xl transition-all duration-200 flex flex-col items-center cursor-pointer hover:scale-[1.02] ${
+                                    flippedCards[card.id]
+                                        ? 'glass-elevated border-emerald-300/50 dark:border-emerald-500/30'
+                                        : 'glass-elevated'
                                 }`}
                             >
                                 {/* Delete Button */}
@@ -190,7 +193,7 @@ const DeckDetail = () => {
                                         e.stopPropagation(); // Prevent triggering the flip when clicking delete
                                         handleDeleteCard(card.id);
                                     }}
-                                    className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center text-white bg-gray-400 rounded-full hover:bg-red-500 transition"
+                                    className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-white/10 rounded-full hover:bg-red-100 hover:text-red-500 dark:hover:bg-red-500/20 dark:hover:text-red-400 transition-all text-sm"
                                     title="Delete Card"
                                 >
                                     ×
@@ -198,13 +201,13 @@ const DeckDetail = () => {
 
                                 {/* Card Content */}
                                 {flippedCards[card.id] ? (
-                                    <p className="text-gray-600 mb-2">A: {card.answer}</p>
+                                    <p className="text-gray-600 dark:text-gray-300 mb-2 text-center">A: {card.answer}</p>
                                 ) : (
                                     <>
-                                        <h3 className="font-semibold text-gray-800 mb-2 text-lg">
+                                        <h3 className="font-semibold text-gray-800 dark:text-white mb-2 text-lg text-center">
                                             Q: {card.question}
                                         </h3>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-xs text-gray-400 dark:text-gray-500">
                                             Next Review: <span className="font-medium">{new Date(card.nextReview).toLocaleString()}</span>
                                         </p>
                                     </>
