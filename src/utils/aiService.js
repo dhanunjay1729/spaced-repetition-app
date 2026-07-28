@@ -78,6 +78,26 @@ class AIService {
       throw error;
     }
   }
+
+  /**
+   * Generate a mixed-format quiz on a given topic
+   * @param {string} topic - The topic to generate a quiz for
+   * @param {string} difficulty - easy, medium, or hard
+   * @returns {Promise<Array>} Array of quiz question objects
+   */
+  async generateQuiz(topic, difficulty = 'medium') {
+    try {
+      console.log(`Generating ${difficulty} quiz on: ${topic}`);
+      const genQuiz = httpsCallable(this.functions, 'generateQuiz');
+
+      const response = await genQuiz({ topic, difficulty });
+      console.log('Quiz generated successfully');
+      return response.data.quiz;
+    } catch (error) {
+      console.error('Failed to generate quiz:', error);
+      throw error;
+    }
+  }
 }
 
 export default new AIService();

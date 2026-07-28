@@ -16,6 +16,7 @@ const DeckManager = lazy(() => import('./pages/DeckManager'));
 const DeckDetail = lazy(() => import('./pages/DeckDetail'));
 const StudySession = lazy(() => import('./pages/StudySession'));
 const Help = lazy(() => import('./pages/Help'));
+const Quiz = lazy(() => import('./pages/Quiz'));
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
                 <Route path="/decks" element={<DeckManager />} />
                 <Route path="/deck/:deckId" element={<DeckDetail />} />
                 <Route path="/study/:deckId" element={<StudySession />} />
+                <Route path="/quiz" element={<Quiz />} />
               </Route>
               
               {/* Default redirect */}

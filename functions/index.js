@@ -15,7 +15,7 @@ exports.processUserQuery = onCall(async (request) => {
 
   try {
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
+      model: "gemini-3.6-flash",
       systemInstruction: `You are an advanced AI assistant integrated into a spaced-repetition learning app. Your primary goal is to help users learn efficiently by providing clear, accurate, and concise information. Analyze the input and adapt your response based on its type. Follow these general guidelines:
 
 - PLAIN TEXT, NO FORMATTING IS NEEDED, NOT EVEN BOLD LETTERS.
@@ -61,7 +61,7 @@ exports.generateHint = onCall(async (request) => {
 
   try {
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
+      model: "gemini-3.6-flash",
       systemInstruction: "You are a helpful assistant that provides hints for flashcards. For a given question, provide a concise and helpful hint that guides the user toward the answer without revealing it directly."
     });
 
@@ -80,7 +80,7 @@ exports.extractTextFromImage = onCall(async (request) => {
   if (!base64Data || !mimeType) throw new HttpsError('invalid-argument', 'Image data is required.');
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
     const result = await model.generateContent([
       "Extract all visible text from this image. Only return the plain text, no explanation.",
       {
@@ -94,5 +94,73 @@ exports.extractTextFromImage = onCall(async (request) => {
   } catch (error) {
     console.error('Gemini Vision Error:', error);
     throw new HttpsError('internal', 'Failed to extract text');
+  }
+});
+
+exports.generateQuiz = onCall(async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'User must be logged in.');
+
+  const { topic, difficulty = 'medium' } = request.data;
+  if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
+    throw new HttpsError('invalid-argument', 'A valid topic string is required.');
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-3.6-flash",
+      systemInstruction: `You are an elite university professor and quiz master. You generate high-quality, conceptual quizzes that test deep understanding, not surface-level memorization.
+
+RULES:
+- Generate exactly 10 questions on the given topic.
+- 7 questions must be of type "mcq" (multiple choice).
+- 3 questions must be of type "fill_blank" (fill in the blank).
+- For MCQs: provide exactly 4 options. Make distractors plausible (no joke answers). correctIndex is 0-based.
+- For fill_blank: the question text MUST contain exactly one blank represented as "___". The answer must be a single word or short phrase (max 4 words).
+- Adjust difficulty based on the level provided (easy, medium, hard).
+- Questions must be factually accurate.
+- Do NOT include "All of the above" or "None of the above" as options.
+- Return ONLY valid JSON. No markdown, no backticks, no explanation.
+
+You MUST return a JSON array of exactly 10 objects with this exact schema:
+[
+  {
+    "type": "mcq",
+    "question": "string",
+    "options": ["string", "string", "string", "string"],
+    "correctIndex": number
+  },
+  {
+    "type": "fill_blank",
+    "question": "string containing ___",
+    "answer": "string"
+  }
+]`
+    });
+
+    const prompt = `Generate a ${difficulty} difficulty quiz on the topic: "${topic.trim()}"`;
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
+
+    // Strip markdown code fences if the model wraps its output
+    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+
+    let quiz;
+    try {
+      quiz = JSON.parse(cleaned);
+    } catch (parseError) {
+      console.error('Failed to parse quiz JSON:', cleaned);
+      throw new HttpsError('internal', 'AI returned invalid quiz format. Please try again.');
+    }
+
+    // Validate the structure
+    if (!Array.isArray(quiz) || quiz.length === 0) {
+      throw new HttpsError('internal', 'AI returned an empty or invalid quiz.');
+    }
+
+    return { quiz };
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+    console.error('Gemini Quiz Error:', error);
+    throw new HttpsError('internal', 'Failed to generate quiz. Please try again.');
   }
 });

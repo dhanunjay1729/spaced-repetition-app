@@ -49,6 +49,9 @@ const Header = () => {
               <Link to="/decks" className="hover:underline">
                 My Decks
               </Link>
+              <Link to="/quiz" className="hover:underline">
+                Quiz
+              </Link>
               <div className="flex items-center gap-4">
                 <button
                   onClick={handleLogout}
@@ -99,6 +102,13 @@ const Header = () => {
                 className="block hover:text-blue-600"
               >
                 My Decks
+              </Link>
+              <Link
+                to="/quiz"
+                onClick={() => setMenuOpen(false)}
+                className="block hover:text-blue-600"
+              >
+                Quiz
               </Link>
               <div className="pt-2 border-t border-gray-200">
                 <button
