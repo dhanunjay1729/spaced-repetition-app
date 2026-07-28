@@ -7,16 +7,22 @@ const Flashcard = ({ card, onRate }) => {
   const [showRating, setShowRating] = useState(false);
   const [hint, setHint] = useState(''); // State to store the hint
   const [loadingHint, setLoadingHint] = useState(false); // State to track hint loading
+  const [startTime, setStartTime] = useState(Date.now());
+  const [timeTaken, setTimeTaken] = useState(0);
+  const [hintUsed, setHintUsed] = useState(false);
 
   // Reset state when card changes (when a new card is loaded)
   useEffect(() => {
     setIsFlipped(false);
     setShowRating(false);
     setHint(''); // Clear the hint when a new card is loaded
+    setHintUsed(false);
+    setStartTime(Date.now());
   }, [card.id]);
 
   const handleFlip = () => {
     setIsFlipped(true);
+    setTimeTaken(Date.now() - startTime); // Record how long user thought before flipping
     // Show rating buttons after a short delay
     setTimeout(() => setShowRating(true), 300);
   };
@@ -29,6 +35,7 @@ const Flashcard = ({ card, onRate }) => {
 
   const handleHint = async () => {
     setLoadingHint(true); // Show loading state for the hint
+    setHintUsed(true); // Penalize score ceiling for using a hint
     try {
       const hintResponse = await AIService.generateHint(card.question); // Fetch hint using AI
       setHint(hintResponse); // Set the hint
@@ -174,17 +181,23 @@ const Flashcard = ({ card, onRate }) => {
             </button>
             <button
               onClick={() => handleRate(4)}
-              className="px-4 py-3 sm:px-6 sm:py-4 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition"
+              disabled={hintUsed}
+              className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-lg transition ${hintUsed ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
             >
               <span className="block text-base sm:text-lg">Good</span>
-              <span className="block text-xs sm:text-sm opacity-80">Recalled with effort</span>
+              <span className="block text-xs sm:text-sm opacity-80">
+                {hintUsed ? 'Disabled (Hint used)' : 'Recalled with effort'}
+              </span>
             </button>
             <button
               onClick={() => handleRate(5)}
-              className="px-4 py-3 sm:px-6 sm:py-4 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition"
+              disabled={hintUsed || timeTaken > 15000}
+              className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-lg transition ${hintUsed || timeTaken > 15000 ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
             >
               <span className="block text-base sm:text-lg">Easy</span>
-              <span className="block text-xs sm:text-sm opacity-80">Perfect recall</span>
+              <span className="block text-xs sm:text-sm opacity-80">
+                {hintUsed ? 'Disabled (Hint used)' : (timeTaken > 15000 ? 'Disabled (>15s thought)' : 'Perfect recall')}
+              </span>
             </button>
           </div>
         </div>
