@@ -15,7 +15,7 @@ exports.processUserQuery = onCall(async (request) => {
 
   try {
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: `You are an advanced AI assistant integrated into a spaced-repetition learning app. Your primary goal is to help users learn efficiently by providing clear, accurate, and concise information. Analyze the input and adapt your response based on its type. Follow these general guidelines:
 
 - PLAIN TEXT, NO FORMATTING IS NEEDED, NOT EVEN BOLD LETTERS.
@@ -61,7 +61,7 @@ exports.generateHint = onCall(async (request) => {
 
   try {
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: "You are a helpful assistant that provides hints for flashcards. For a given question, provide a concise and helpful hint that guides the user toward the answer without revealing it directly."
     });
 
@@ -80,7 +80,7 @@ exports.extractTextFromImage = onCall(async (request) => {
   if (!base64Data || !mimeType) throw new HttpsError('invalid-argument', 'Image data is required.');
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const result = await model.generateContent([
       "Extract all visible text from this image. Only return the plain text, no explanation.",
       {
