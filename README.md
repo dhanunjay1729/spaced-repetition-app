@@ -9,8 +9,8 @@
   <h1 align="center">🧠 SpacedRep</h1>
 
   <p align="center">
-    <strong>An elite-level, AI-native spaced repetition study platform.</strong><br />
-    Generate entire flashcard decks from a single topic using Gemini 3.6 Flash, memorize them with a mathematically optimal SM-2 algorithm, and track your mastery through a stunning glassmorphism interface.
+    <strong>A modern spaced repetition application built to accelerate learning.</strong><br />
+    SpacedRep combines the SM-2 algorithm with Gemini AI to let you instantly generate, curate, and study flashcards without the manual data-entry friction.
   </p>
 
   <br />
