@@ -1,89 +1,114 @@
-# Spaced Repetition App - AI-Enhanced Flashcard Study Tool
+<div align="center">
+  <img src="https://img.shields.io/badge/Status-Live-success?style=for-the-badge" alt="Status" />
+  <img src="https://img.shields.io/badge/Version-2.0-blue?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/Stack-React%20%7C%20Tailwind%20%7C%20Firebase-informational?style=for-the-badge" alt="Tech Stack" />
 
-An intelligent flashcard study application that uses spaced repetition algorithms and AI to optimize learning efficiency. Built with modern web technologies and enhanced with OpenAI integration for smarter study experiences.
+  <br />
+  <br />
 
-## ✨ Features
+  <h1 align="center">🧠 SpacedRep</h1>
 
-- **Spaced Repetition Algorithm**: Implements SM-2 algorithm for optimal learning intervals
-- **AI-Powered Hints**: Contextual hints and explanations powered by OpenAI API
-- **Image Text Extraction**: Extract text from images using AI for easy flashcard creation
-- **Real-time Synchronization**: Cross-device sync with Firebase backend
-- **Modern UI**: Smooth animations and responsive design with Framer Motion
-- **Progress Tracking**: Visual analytics of learning progress and retention rates
+  <p align="center">
+    <strong>An elite-level, AI-native spaced repetition study platform.</strong><br />
+    Generate entire flashcard decks from a single topic using Gemini 3.6 Flash, memorize them with a mathematically optimal SM-2 algorithm, and track your mastery through a stunning glassmorphism interface.
+  </p>
 
-## 🛠️ Tech Stack
+  <br />
+  
+  [**🚀 View Live Demo**](https://spaced-repetition-app-ecru.vercel.app) •
+  [**🐛 Report Bug**](https://github.com/dhanunjay1729/spaced-repetition-app/issues) •
+  [**✨ Request Feature**](https://github.com/dhanunjay1729/spaced-repetition-app/issues)
 
-- **Frontend**: React.js, Vite
-- **Styling**: TailwindCSS
-- **Animations**: Framer Motion
-- **State Management**: Zustand
-- **Backend**: Firebase (Authentication, Firestore, Functions)
-- **AI Integration**: OpenAI API
-- **Deployment**: Vercel
+</div>
 
-## 🎯 How It Works
+---
 
-1. **Smart Scheduling**: Uses SM-2 algorithm to schedule card reviews based on performance
-2. **AI Assistance**: Get contextual hints and explanations when struggling with concepts
-3. **Image Processing**: Upload images and extract text automatically for flashcard creation
-4. **Progress Analytics**: Track learning efficiency and retention patterns
-5. **Cross-Device Sync**: Study seamlessly across multiple devices
+## ✨ Features (The 2026 Shift)
 
-## 🧠 SM-2 Algorithm Explained
+### 🤖 Generative AI Quiz Pipeline
+Never write a flashcard manually again. 
+- **Topic to Quiz:** Enter a topic (e.g., "React Hooks") and select a difficulty.
+- **Mixed Formats:** The AI generates a structured quiz combining **Multiple Choice** and **Fill-in-the-Blanks**.
+- **Instant Curation:** Grade yourself instantly, toggle which questions you want to keep, and save them directly as a new Flashcard deck in one click.
 
-The SM-2 (SuperMemo 2) algorithm is a spaced repetition method that optimizes learning by scheduling reviews based on your performance:
+### 📈 Honest SM-2 Algorithm
+We implemented the scientifically backed **SuperMemo-2 (SM-2)** algorithm, but with a twist to prevent cheating:
+- **Time Penalties:** If you take longer than 15 seconds to flip a card, the "Easy" rating is automatically disabled.
+- **Hint Penalties:** Using an AI-generated hint dynamically disables both "Good" and "Easy" ratings, forcing an honest review cycle and preventing false mastery.
 
-### How it works:
-1. **Initial Learning**: New cards start with short intervals (1-3 days)
-2. **Performance Rating**: After each review, rate your recall difficulty (1-5 scale)
-3. **Interval Calculation**: 
-   - Good performance → longer intervals (exponential growth)
-   - Poor performance → reset to shorter intervals
-4. **Easiness Factor**: Each card has an "easiness" score that adjusts based on your performance history
+### 🎨 Premium Glassmorphism Design
+Built with a modern, enterprise-grade styling approach:
+- **Dark Mode Native:** Deep surface colors with vibrant indigo and emerald accents.
+- **Glassmorphism:** Elegant, frosted-glass cards (`backdrop-blur`) that float over ambient gradients.
+- **Micro-Interactions:** Smooth Framer-style CSS transitions for card flips, page loads, and active button states.
 
-### The Math Behind It:
-- **Easy cards**: Next interval = Previous interval × Easiness Factor (typically 2.5+)
-- **Difficult cards**: Interval resets to 1 day, easiness factor decreases
-- **Optimal timing**: Reviews happen just before you're likely to forget
+---
 
-### Why It Works:
-- **Forgetting Curve**: Leverages psychological research on memory retention
-- **Personalized**: Adapts to your individual learning patterns
-- **Efficient**: Maximizes retention while minimizing study time
-- **Long-term Focus**: Builds permanent memory rather than cramming
+## 🛠️ Architecture & Tech Stack
 
-This algorithm ensures you spend more time on difficult concepts while maintaining knowledge of easier material with minimal effort.
+This application is built on the **"Enterprise Stack"** for maximum scalability and real-time performance.
 
-## 📱 Usage
+| Category | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend** | React 19 + Vite | High-performance client with fast Hot Module Replacement. |
+| **Styling** | Tailwind CSS | Custom design system utilizing CSS variables and glassmorphism utilities. |
+| **Backend & DB** | Firebase (Firestore) | Real-time NoSQL database syncing your study progress across all devices. |
+| **Auth** | Firebase Auth | Secure email/password authentication. |
+| **Serverless** | Google Cloud Functions | Secure backend endpoints for handling AI prompt injection and schema formatting. |
+| **AI Model** | Gemini 3.6 Flash | Blazing fast LLM used for structured JSON quiz generation and contextual hints. |
+| **Hosting** | Vercel | Global Edge Network delivery. |
 
-- Create flashcard decks for different subjects
-- Study with spaced repetition scheduling
-- Get AI-powered hints when needed
-- Extract text from images for quick card creation
-- Track your learning progress over time
+---
 
-## 🔧 Key Features Implemented
+## 🚀 Getting Started
 
-- User authentication and profile management
-- Flashcard creation and editing interface
-- SM-2 spaced repetition algorithm
-- Firebase real-time database integration
-- OpenAI API integration for hints
-- Image text extraction functionality
-- Progress tracking and analytics
-- Responsive design with smooth animations
+### Prerequisites
+Make sure you have Node.js (v18+) and npm installed on your machine.
 
-## 🚀 Live Demo
+### Installation
 
-Check out the live application: [Spaced Repetition App](https://spaced-repetition-app-ecru.vercel.app)
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/dhanunjay1729/spaced-repetition-app.git
+   cd spaced-repetition-app
+   ```
 
-## 🤝 Contributing
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+3. **Set up Firebase Environment Variables**
+   Create a `.env` file in the root directory and add your Firebase credentials:
+   ```env
+   VITE_FIREBASE_API_KEY=your_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+   VITE_FIREBASE_APP_ID=your_app_id
+   ```
 
-## 📄 License
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
-This project is licensed under the MIT License.
+---
+
+## 🧠 The Math Behind the Mastery (SM-2)
+
+When you review a card, you rate your recall on a scale of 0 to 5. The app then calculates your next review interval using the SM-2 formula:
+
+1. **Easiness Factor (EF):** `EF' = EF + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))`
+2. **Interval (I):** 
+   - `I(1) = 1`
+   - `I(2) = 6`
+   - `I(n) = I(n-1) * EF` (for `n > 2`)
+
+By integrating **Time-to-Answer** and **Hint Usage** directly into the quality rating bounds, SpacedRep ensures your Easiness Factor is a true reflection of your cognitive retention.
+
+---
 
 ## 👨‍💻 Author
 
@@ -94,4 +119,6 @@ This project is licensed under the MIT License.
 
 ---
 
-*Built with ❤️ to make studying more efficient and effective*
+<div align="center">
+  <i>Built with ❤️ to make studying mathematically optimal and visually stunning.</i>
+</div>
