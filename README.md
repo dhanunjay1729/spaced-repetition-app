@@ -17,7 +17,7 @@ SpacedRep relies heavily on the **SM-2 (SuperMemo-2)** algorithm, widely conside
 Human memory decays exponentially. If you learn something once, you will forget roughly 70% of it within a few days. **Spaced repetition flattens this curve** by forcing you to recall information just as you are about to forget it.
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/ForgettingCurve.svg/1024px-ForgettingCurve.svg.png" width="600" alt="Ebbinghaus Forgetting Curve">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/ForgettingCurve.svg" width="600" alt="Ebbinghaus Forgetting Curve">
   <br>
   <i>The Ebbinghaus Forgetting Curve: Each review (green line) resets memory retention to 100% and slows down the rate of future decay.</i>
 </p>
