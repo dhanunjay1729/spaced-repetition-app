@@ -14,13 +14,9 @@ SpacedRep is a modern spaced repetition web application designed to make learnin
 SpacedRep relies heavily on the **SM-2 (SuperMemo-2)** algorithm, widely considered one of the most mathematically effective methods for long-term memory retention.
 
 ### The Forgetting Curve
-Human memory decays exponentially. If you learn something once, you will forget roughly 70% of it within a few days. **Spaced repetition flattens this curve** by forcing you to recall information just as you are about to forget it.
+Human memory decays exponentially. If you learn something once, you will forget roughly 70% of it within a few days. **Spaced repetition flattens this curve** by forcing you to recall information just as you are about to forget it. 
 
-<p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/ForgettingCurve.svg" width="600" alt="Ebbinghaus Forgetting Curve">
-  <br>
-  <i>The Ebbinghaus Forgetting Curve: Each review (green line) resets memory retention to 100% and slows down the rate of future decay.</i>
-</p>
+Unlike traditional studying where you review everything daily, SM-2 specifically schedules reviews at **expanding intervals** (e.g., 1 day, then 6 days, then 20 days). This ensures you only study what you are actually on the verge of forgetting, maximizing long-term retention with minimal daily effort.
 
 ### How SpacedRep's Algorithm Works
 
