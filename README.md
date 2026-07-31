@@ -9,15 +9,47 @@ SpacedRep is a modern spaced repetition web application designed to make learnin
 - **Honest Review Metrics**: The app tracks how long you take to answer a card and whether you used an AI-generated hint. Taking longer than 15 seconds or using a hint dynamically limits your maximum score (preventing you from falsely rating a card as "Easy").
 - **Dark Mode UI**: A clean, distraction-free interface built with Tailwind CSS.
 
-## 🧠 Why SM-2? (The Benefits)
+## 🧠 Why SM-2? (The Science of Memory)
 
-SpacedRep relies heavily on the **SM-2 (SuperMemo-2)** algorithm, which is widely considered one of the most effective methods for long-term memory retention.
+SpacedRep relies heavily on the **SM-2 (SuperMemo-2)** algorithm, widely considered one of the most mathematically effective methods for long-term memory retention.
 
-Instead of studying all flashcards every day, SM-2 schedules reviews based on your historical performance with each specific card. 
+### The Forgetting Curve
+Human memory decays exponentially. If you learn something once, you will forget roughly 70% of it within a few days. **Spaced repetition flattens this curve** by forcing you to recall information just as you are about to forget it.
 
-1. **Combats the Forgetting Curve**: Human memory decays exponentially. SM-2 mathematically calculates the optimal time to review a concept—usually right before you are likely to forget it.
-2. **Maximizes Efficiency**: You don't waste time reviewing cards you already know well. The algorithm pushes easy cards weeks or months into the future, allowing you to focus your daily study time entirely on your weakest concepts.
-3. **Dynamic Easiness Factor (EF)**: Every card has an EF (starting at 2.5). If you rate a card as "Easy" (5), the interval before you see it again grows significantly. If you rate it "Again" (0), the interval resets to zero, ensuring you see it until it sticks.
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/ForgettingCurve.svg/1024px-ForgettingCurve.svg.png" width="600" alt="Ebbinghaus Forgetting Curve">
+  <br>
+  <i>The Ebbinghaus Forgetting Curve: Each review (green line) resets memory retention to 100% and slows down the rate of future decay.</i>
+</p>
+
+### How SpacedRep's Algorithm Works
+
+Instead of studying all flashcards every day, SM-2 schedules reviews based on your historical performance with each specific card. Every card has an **Easiness Factor (EF)** starting at 2.5.
+
+```mermaid
+graph TD
+    A[Study a Flashcard] --> B{How well did you remember?}
+    
+    B -->|Again 0| C[Score: 0]
+    B -->|Hard 3| D[Score: 3]
+    B -->|Good 4| E[Score: 4]
+    B -->|Easy 5| F[Score: 5]
+    
+    C --> G[Interval resets to 1 day<br>Easiness Factor drops]
+    D --> H[Interval grows slightly<br>Easiness Factor drops]
+    E --> I[Interval grows moderately<br>Easiness Factor stays same]
+    F --> J[Interval multiplies massively<br>Easiness Factor increases]
+    
+    G --> K((Card Scheduled<br>For Review))
+    H --> K
+    I --> K
+    J --> K
+```
+
+**What makes SpacedRep different?** We added **Honest Review Constraints**:
+- If you use an AI hint, the `Good` and `Easy` buttons are disabled.
+- If you take longer than 15 seconds to answer, the `Easy` button is disabled. 
+- This forces the SM-2 algorithm to give you mathematically honest intervals, preventing you from faking mastery.
 
 ## 🛠️ Tech Stack
 
