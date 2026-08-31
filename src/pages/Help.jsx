@@ -14,7 +14,8 @@ import {
   Sparkles,
   ArrowRight,
   CheckCircle2,
-  HelpCircle
+  HelpCircle,
+  Target
 } from 'lucide-react';
 
 const Help = () => {
@@ -271,6 +272,20 @@ const Help = () => {
               <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                 Snap or upload pictures of textbooks, slides, or handwritten study notes. The AI automatically scans text and formats it into ready-to-study flashcards.
               </p>
+            </div>
+
+            <div className="sm:col-span-2 p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <h4 className="font-semibold text-emerald-900 dark:text-emerald-300 text-base mb-2 flex items-center gap-2">
+                <Target className="w-5 h-5 text-emerald-500" />
+                Interactive AI Topic Quizzes
+              </h4>
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
+                Test your knowledge before you even create a deck! Enter any topic and difficulty level to generate a custom mixed-format quiz (Multiple Choice & Fill in the Blanks) on the fly.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 p-2 rounded-lg inline-block">
+                <CheckCircle2 className="w-4 h-4" />
+                <span><strong>Curate your gaps:</strong> After the quiz, handpick any tricky questions you missed and instantly convert them into a SpacedRep deck.</span>
+              </div>
             </div>
           </div>
         </Section>
