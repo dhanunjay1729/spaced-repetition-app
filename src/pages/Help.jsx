@@ -305,7 +305,7 @@ const Help = () => {
           Create your first deck and experience the power of spaced repetition!
         </p>
         <Link 
-          to="/decks" 
+          to="/login" 
           className="inline-block px-6 py-2 bg-white text-blue-700 font-semibold rounded-lg hover:bg-gray-100 transition"
         >
           Create Your First Deck

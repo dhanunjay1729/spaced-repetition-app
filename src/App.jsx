@@ -5,7 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import Header from './components/Header';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import './App.css';
 
@@ -18,6 +18,11 @@ const DeckDetail = lazy(() => import('./pages/DeckDetail'));
 const StudySession = lazy(() => import('./pages/StudySession'));
 const Help = lazy(() => import('./pages/Help'));
 const Quiz = lazy(() => import('./pages/Quiz'));
+
+const RootRedirect = () => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/help" replace />;
+};
 
 function App() {
   return (
@@ -44,8 +49,8 @@ function App() {
                 <Route path="/quiz" element={<Quiz />} />
               </Route>
               
-              {/* Default redirect */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              {/* Default redirect (smart redirect to dash or help based on auth) */}
+              <Route path="/" element={<RootRedirect />} />
             </Routes>
           </Suspense>
         </main>
