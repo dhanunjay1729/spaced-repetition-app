@@ -22,6 +22,9 @@ const Quiz = () => {
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [grading, setGrading] = useState(false);       // semantic grading in progress
+  const [gradeReason, setGradeReason] = useState('');  // AI explanation of grading
+
 
   // Phase 3: Results state
   const [keepState, setKeepState] = useState({});
@@ -73,7 +76,7 @@ const Quiz = () => {
     }));
   };
 
-  const handleSubmitAnswer = () => {
+  const handleSubmitAnswer = async () => {
     const q = questions[currentQ];
     const userAnswer = answers[currentQ];
 
@@ -83,12 +86,38 @@ const Quiz = () => {
     }
 
     let isCorrect;
+    let reason = '';
+
     if (q.type === 'mcq') {
+      // MCQ: exact index match (no semantic grading needed — options are fixed)
       isCorrect = userAnswer.selected === q.correctIndex;
     } else {
-      isCorrect = userAnswer.selected.trim().toLowerCase() === q.answer.trim().toLowerCase();
+      // Fill-in-blank: semantic grading via Gemini LLM-judge
+      // Accepts synonyms, paraphrases, and minor typos
+      setGrading(true);
+      try {
+        const result = await AIService.gradeAnswer(
+          userAnswer.selected,
+          q.answer,
+          q.question
+        );
+        isCorrect = result.correct;
+        reason = result.reason || '';
+        if (result.confidence === 'low' && result.correct) {
+          reason = `✨ Accepted (${result.reason})`;
+        } else if (!result.correct && result.reason) {
+          reason = `ℹ️ ${result.reason}`;
+        }
+      } catch {
+        // Ultimate fallback — exact match
+        isCorrect = userAnswer.selected.trim().toLowerCase() === q.answer.trim().toLowerCase();
+        reason = '';
+      } finally {
+        setGrading(false);
+      }
     }
 
+    setGradeReason(reason);
     setAnswers(prev => ({
       ...prev,
       [currentQ]: { ...prev[currentQ], isCorrect }
@@ -96,14 +125,17 @@ const Quiz = () => {
     setSubmitted(true);
   };
 
+
   const handleNext = () => {
     if (currentQ + 1 < questions.length) {
       setCurrentQ(currentQ + 1);
       setSubmitted(false);
+      setGradeReason('');
     } else {
       setPhase('results');
     }
   };
+
 
   // ─── Phase 3: Save kept cards ──────────────────────────────────────
   const handleSaveToDecks = async () => {
@@ -349,13 +381,24 @@ const Quiz = () => {
           {/* Feedback after submit */}
           {submitted && (
             <div className={`mt-5 p-3 rounded-xl text-center font-semibold ${
-              userAnswer?.isCorrect
+              answers[currentQ]?.isCorrect
                 ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300'
                 : 'bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-300'
             }`}>
-              {userAnswer?.isCorrect ? '✅ Correct!' : '❌ Incorrect'}
+              {answers[currentQ]?.isCorrect ? '✅ Correct!' : '❌ Incorrect'}
+              {gradeReason && (
+                <p className="text-xs font-normal mt-1 opacity-80">{gradeReason}</p>
+              )}
             </div>
           )}
+
+          {/* Grading in progress */}
+          {grading && (
+            <div className="mt-5 p-3 rounded-xl text-center text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 animate-pulse">
+              🤖 Grading your answer semantically...
+            </div>
+          )}
+
         </div>
 
         {/* Action Buttons */}
@@ -364,9 +407,10 @@ const Quiz = () => {
             <button
               id="quiz-submit-answer"
               onClick={handleSubmitAnswer}
-              className="btn-primary"
+              disabled={grading}
+              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit Answer
+              {grading ? '🤖 Grading...' : 'Submit Answer'}
             </button>
           ) : (
             <button
@@ -378,6 +422,7 @@ const Quiz = () => {
             </button>
           )}
         </div>
+
       </div>
     );
   }

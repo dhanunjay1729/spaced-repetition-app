@@ -164,3 +164,62 @@ You MUST return a JSON array of exactly 10 objects with this exact schema:
     throw new HttpsError('internal', 'Failed to generate quiz. Please try again.');
   }
 });
+
+// ─── Semantic Answer Grading ────────────────────────────────────────────────
+// Hybrid grader: uses Gemini as LLM-judge to semantically evaluate fill-in-blank
+// answers. Accepts synonyms, paraphrases, and minor typos.
+// Why: exact string matching ("mitosis" ≠ "cell division") penalizes understanding.
+exports.gradeAnswer = onCall(async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'User must be logged in.');
+
+  const { userAnswer, correctAnswer, question } = request.data;
+  if (!userAnswer || !correctAnswer) {
+    throw new HttpsError('invalid-argument', 'userAnswer and correctAnswer are required.');
+  }
+
+  // Fast path: exact match (case/whitespace insensitive)
+  if (userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()) {
+    return { correct: true, confidence: 'exact', reason: 'Exact match.' };
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
+
+    const prompt = `You are grading a fill-in-the-blank flashcard answer. Be generous with synonyms and paraphrases — your goal is to assess understanding, not exact wording.
+
+Question: "${question}"
+Correct Answer: "${correctAnswer}"
+Student's Answer: "${userAnswer}"
+
+Is the student's answer semantically correct? Consider:
+- Synonyms (e.g. "mitosis" ≈ "cell division" for some contexts)
+- Minor typos (e.g. "mtiosis" ≈ "mitosis")
+- Reasonable paraphrases of short answers
+- Do NOT accept answers that are factually different concepts
+
+Respond with ONLY valid JSON, no markdown:
+{"correct": true/false, "confidence": "high"/"medium"/"low", "reason": "one short sentence"}`;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim()
+      .replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      // Fallback: if JSON parsing fails, return incorrect
+      return { correct: false, confidence: 'low', reason: 'Could not parse AI response.' };
+    }
+
+    return {
+      correct: Boolean(parsed.correct),
+      confidence: parsed.confidence || 'medium',
+      reason: parsed.reason || '',
+    };
+  } catch (error) {
+    console.error('Semantic grading error:', error);
+    // Fallback to strict matching on API failure — never crash the quiz
+    return { correct: false, confidence: 'low', reason: 'AI grading unavailable.' };
+  }
+});

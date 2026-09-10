@@ -89,7 +89,6 @@ class AIService {
     try {
       console.log(`Generating ${difficulty} quiz on: ${topic}`);
       const genQuiz = httpsCallable(this.functions, 'generateQuiz');
-
       const response = await genQuiz({ topic, difficulty });
       console.log('Quiz generated successfully');
       return response.data.quiz;
@@ -98,6 +97,29 @@ class AIService {
       throw error;
     }
   }
+
+  /**
+   * Semantically grade a fill-in-the-blank answer using Gemini as LLM-judge.
+   * Accepts synonyms, paraphrases, and minor typos.
+   *
+   * @param {string} userAnswer    - What the user typed
+   * @param {string} correctAnswer - The expected answer
+   * @param {string} question      - The question text (provides context)
+   * @returns {Promise<{correct: boolean, confidence: string, reason: string}>}
+   */
+  async gradeAnswer(userAnswer, correctAnswer, question = '') {
+    try {
+      const grade = httpsCallable(this.functions, 'gradeAnswer');
+      const response = await grade({ userAnswer, correctAnswer, question });
+      return response.data;
+    } catch (error) {
+      console.error('Semantic grading failed, falling back to exact match:', error);
+      // Graceful fallback — never crash the quiz on a grading API failure
+      const correct = userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+      return { correct, confidence: 'low', reason: 'Exact match (AI unavailable).' };
+    }
+  }
 }
 
 export default new AIService();
+
