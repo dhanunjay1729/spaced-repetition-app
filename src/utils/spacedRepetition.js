@@ -22,10 +22,6 @@ export const RATING_OPTIONS = {
 };
 
 // ─── Create a brand-new FSRS card ─────────────────────────────────────────
-/**
- * Returns FSRS initial state fields to merge into a card before saving.
- * Call this when creating any new card (manual or AI-generated).
- */
 export const createFSRSCard = () => {
   const empty = createEmptyCard(new Date());
   return {
@@ -43,13 +39,6 @@ export const createFSRSCard = () => {
 };
 
 // ─── Apply a rating to a card ──────────────────────────────────────────────
-/**
- * Schedules the next review using FSRS-6 given the current card state.
- * @param {Object} card   - Card from Firestore (has stability, difficulty, state, etc.)
- * @param {number} rating - RATING_OPTIONS.AGAIN / HARD / GOOD / EASY
- * @param {Date}   now    - Optional: override current time (default: new Date())
- * @returns {Object} Updated fields to merge into the card in Firestore
- */
 export const updateCardWithFSRS = (card, rating, now = new Date()) => {
   const fsrsCard = {
     due:            card.due ? new Date(card.due) : now,
@@ -80,10 +69,6 @@ export const updateCardWithFSRS = (card, rating, now = new Date()) => {
   };
 };
 
-/**
- * Preview all 4 rating outcomes without committing.
- * Useful for showing the user what interval each rating would result in.
- */
 export const previewFSRSRatings = (card, now = new Date()) => {
   const fsrsCard = {
     due:            card.due ? new Date(card.due) : now,
@@ -100,10 +85,6 @@ export const previewFSRSRatings = (card, now = new Date()) => {
 };
 
 // ─── Due Cards ────────────────────────────────────────────────────────────
-/**
- * Returns cards whose next review is at or before now.
- * Works for both FSRS cards (due field) and legacy SM-2 cards (nextReview field).
- */
 export const getDueCards = (cards) => {
   const now = new Date();
   return cards.filter(card => {
@@ -113,10 +94,6 @@ export const getDueCards = (cards) => {
 };
 
 // ─── Card Status Grouping ──────────────────────────────────────────────────
-/**
- * Groups cards into New / Due / Learning / Learned.
- * Maps FSRS State enum to display labels. Backward-compatible with old SM-2 cards.
- */
 export const getCardsByStatus = (cards) => {
   const now = new Date();
 
@@ -155,16 +132,6 @@ export const getCardsByStatus = (cards) => {
 };
 
 // ─── Retention / Forgetting Curve ─────────────────────────────────────────
-/**
- * Computes the FSRS-6 power-law forgetting curve for a card.
- * Formula: R(t) = (1 + factor * t/S)^(-w20)
- * where factor = 0.9^(-1/w20) - 1, ensuring R = 90% when t = S (days).
- *
- * @param {number} stabilityDays - Card's current stability in days
- * @param {number} totalDays     - How far out to plot (default: 3× stability, min 30 days)
- * @param {number} w20           - FSRS-6 shape parameter (default: 0.1542)
- * @returns {Array<{day: number, retention: number}>}
- */
 export const generateForgettingCurve = (stabilityDays, totalDays = null, w20 = 0.1542) => {
   const S = Math.max(stabilityDays ?? 1, 0.1);
   const plotDays = totalDays ?? Math.max(S * 3, 30);
@@ -182,9 +149,6 @@ export const generateForgettingCurve = (stabilityDays, totalDays = null, w20 = 0
   return points;
 };
 
-/**
- * Returns current retention % for a card based on how long ago it was last reviewed.
- */
 export const getCurrentRetention = (card) => {
   if (!card.stability || !card.last_review) return 100;
   const S = card.stability;
@@ -212,145 +176,4 @@ export const getRatingButtons = () => [
   { rating: RATING_OPTIONS.HARD,  label: 'Hard',  color: 'orange', description: 'Difficult recall' },
   { rating: RATING_OPTIONS.GOOD,  label: 'Good',  color: 'blue',   description: 'Correct with effort' },
   { rating: RATING_OPTIONS.EASY,  label: 'Easy',  color: 'green',  description: 'Perfect recall' },
-];
-
-
-/**
- * SM-2 Algorithm Implementation
- * Based on: https://en.wikipedia.org/wiki/SuperMemo#Description_of_SM-2_algorithm
- */
-
-/**
- * Calculate the next review interval and ease factor
- * @param {Object} card - The card being reviewed
- * @param {number} quality - Quality of recall (0-5)
- * @returns {Object} Updated card properties
- */
-export const calculateSM2 = (card, quality) => {
-  console.log('Calculating SM-2 for card:', card, 'Quality:', quality);
-
-  let { interval, repetitions, easeFactor } = card;
-
-  // Adjust ease factor (EF)
-  const newEaseFactor = Math.max(
-    1.3,
-    easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
-  );
-
-  let newInterval;
-  let newRepetitions;
-
-  if (quality < 3) {
-    // Forgot → Reset repetitions and review tomorrow
-    newInterval = 1;
-    newRepetitions = 0;
-  } else {
-    // Remembered → Apply SM2 spacing
-    if (repetitions === 0) {
-      newInterval = 1; // First review → 1 day later
-    } else if (repetitions === 1) {
-      newInterval = 6; // Second review → 6 days later
-    } else {
-      newInterval = Math.round(interval * newEaseFactor);  // Subsequent reviews → EF growth
-    }
-    newRepetitions = repetitions + 1;
-  }
-
-  // Always set nextReview to start of day for consistency
-  const nextReviewDate = startOfDay(addDays(new Date(), newInterval));
-
-  const updatedCard = {
-    interval: newInterval,
-    repetitions: newRepetitions,
-    easeFactor: newEaseFactor,
-    nextReview: nextReviewDate.toISOString(),
-    lastReviewed: new Date().toISOString()
-  };
-
-  console.log('Updated card properties:', updatedCard);
-  return updatedCard;
-};
-
-/**
- * Get cards due for review
- * @param {Array} cards - All cards
- * @returns {Array} Cards due for review
- */
-export const getDueCards = (cards) => {
-  const now = new Date();
-
-  return cards.filter(card => {
-    const reviewDate = new Date(card.nextReview);
-    return reviewDate <= now; // Include cards due up to now
-  });
-};
-
-/**
- * Get cards by their learning status
- * @param {Array} cards - All cards
- * @returns {Object} Cards grouped by status
- */
-export const getCardsByStatus = (cards) => {
-  const now = new Date();
-
-  return cards.reduce((acc, card) => {
-    const reviewDate = new Date(card.nextReview);
-
-    if (card.repetitions === 0) {
-      acc.new.push(card);
-    } else if (reviewDate <= now) {
-      acc.due.push(card);
-    } else if (card.repetitions < 3) {
-      acc.learning.push(card);
-    } else {
-      acc.learned.push(card);
-    }
-
-    return acc;
-  }, { new: [], due: [], learning: [], learned: [] });
-};
-
-/**
- * Format interval for display
- * @param {number} interval - Interval in days
- * @returns {string} Human-readable interval
- */
-export const formatInterval = (interval) => {
-  if (interval === 0) return 'Now';
-  if (interval === 1) return 'Tomorrow';
-  if (interval < 7) return `${interval} days`;
-  if (interval < 30) return `${Math.round(interval / 7)} weeks`;
-  if (interval < 365) return `${Math.round(interval / 30)} months`;
-  return `${Math.round(interval / 365)} years`;
-};
-
-/**
- * Get rating button config
- * @returns {Array} Rating button configurations
- */
-export const getRatingButtons = () => [
-  {
-    rating: RATING_OPTIONS.AGAIN,
-    label: 'Again',
-    color: 'red',
-    description: 'Complete blackout'
-  },
-  {
-    rating: RATING_OPTIONS.HARD,
-    label: 'Hard',
-    color: 'orange',
-    description: 'Difficult recall'
-  },
-  {
-    rating: RATING_OPTIONS.GOOD,
-    label: 'Good',
-    color: 'blue',
-    description: 'Correct with effort'
-  },
-  {
-    rating: RATING_OPTIONS.EASY,
-    label: 'Easy',
-    color: 'green',
-    description: 'Perfect recall'
-  }
 ];
