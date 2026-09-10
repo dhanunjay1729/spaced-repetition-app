@@ -1,58 +1,45 @@
 # SpacedRep
 
-SpacedRep is a modern spaced repetition web application designed to make learning and memorization more efficient. It combines the proven SM-2 spaced repetition algorithm with AI to streamline the process of creating and reviewing flashcards.
+SpacedRep is a modern spaced repetition learning app that combines the state-of-the-art **FSRS-6 scheduling algorithm**, live **memory retention curve visualization**, and **AI-powered quiz generation** with semantic answer grading.
 
 ## ✨ Core Features
 
-- **AI Flashcard Generation**: Enter a topic, and the app uses Gemini AI to automatically generate a mixed-format quiz (Multiple Choice and Fill-in-the-Blanks). You can select which questions to keep and save them directly as a new deck.
-- **SM-2 Algorithm Implementation**: Cards are scheduled for review based on the SuperMemo-2 algorithm to ensure you study concepts exactly when you are about to forget them.
-- **Honest Review Metrics**: The app tracks how long you take to answer a card and whether you used an AI-generated hint. Taking longer than 15 seconds or using a hint dynamically limits your maximum score (preventing you from falsely rating a card as "Easy").
-- **Dark Mode UI**: A clean, distraction-free interface built with Tailwind CSS.
+- **FSRS-6 Scheduling Algorithm**: Upgraded from SM-2 to FSRS-6 — the same algorithm Anki adopted as its default in October 2023. FSRS achieves ~4% recall prediction error on 100M+ real reviews vs. SM-2's ~14%, and reduces daily review workload by 20–30% at the same retention rate. Tracks Stability (S), Difficulty (D), and Retrievability (R) per card with 21 learned parameters.
 
-## 🧠 Why SM-2? (The Science of Memory)
+- **Live Forgetting Curve Visualization**: Every card shows its real-time memory decay curve using the FSRS-6 power-law formula `R(t) = (1 + factor·t/S)^(−w₂₀)`. Click any card in a deck to see its live retention %, current memory stability, FSRS state, and the predicted decay curve plotted with Recharts.
 
-SpacedRep relies heavily on the **SM-2 (SuperMemo-2)** algorithm, widely considered one of the most mathematically effective methods for long-term memory retention.
+- **AI Quiz Generator with Semantic Grading**: Enter any topic to generate a mixed-format quiz (MCQ + Fill-in-the-Blank). Fill-in-blank answers are graded semantically using Gemini as an LLM-judge — accepting synonyms, paraphrases, and minor typos. "Cell division" is accepted for "mitosis" when contextually correct. Convert incorrect answers directly into FSRS-scheduled flashcard decks.
 
-### The Forgetting Curve
-Human memory decays exponentially. If you learn something once, you will forget roughly 70% of it within a few days. **Spaced repetition flattens this curve** by forcing you to recall information just as you are about to forget it. 
+- **Honest Review Constraints**: The app tracks response time and hint usage. Using an AI hint disables the Good and Easy ratings. Taking >15 seconds disables Easy. This keeps FSRS intervals mathematically honest — preventing inflated ease factors.
 
-Unlike traditional studying where you review everything daily, SM-2 specifically schedules reviews at **expanding intervals** (e.g., 1 day, then 6 days, then 20 days). This ensures you only study what you are actually on the verge of forgetting, maximizing long-term retention with minimal daily effort.
+- **SM-2 Backward Compatibility**: Existing cards created with SM-2 fields (interval, repetitions, easeFactor) are handled gracefully via FSRS defaults on first load.
 
-### How SpacedRep's Algorithm Works
+## 🧠 Why FSRS over SM-2?
 
-Instead of studying all flashcards every day, SM-2 schedules reviews based on your historical performance with each specific card. Every card has an **Easiness Factor (EF)** starting at 2.5.
+SM-2 was designed in 1987 for early computers and uses fixed heuristics that don't personalize to individual users.
 
-```mermaid
-graph TD
-    A[Study a Flashcard] --> B{How well did you remember?}
-    
-    B -->|Again 0| C[Score: 0]
-    B -->|Hard 3| D[Score: 3]
-    B -->|Good 4| E[Score: 4]
-    B -->|Easy 5| F[Score: 5]
-    
-    C --> G[Interval resets to 1 day<br>Easiness Factor drops]
-    D --> H[Interval grows slightly<br>Easiness Factor drops]
-    E --> I[Interval grows moderately<br>Easiness Factor stays same]
-    F --> J[Interval multiplies massively<br>Easiness Factor increases]
-    
-    G --> K((Card Scheduled<br>For Review))
-    H --> K
-    I --> K
-    J --> K
+FSRS-6 uses a neural-network-inspired model trained on 100M+ anonymized review logs:
+
+| Metric | SM-2 | FSRS-6 |
+|---|---|---|
+| Recall prediction error (RMSE) | ~14% | **~4%** |
+| Daily reviews at same retention | Baseline | **20–30% fewer** |
+| "Ease hell" problem | Yes | **Eliminated** (mean-reversion) |
+| Personalization | None | **Per-user** (after ~400 reviews) |
+
+The forgetting curve formula:
 ```
-
-**What makes SpacedRep different?** We added **Honest Review Constraints**:
-- If you use an AI hint, the `Good` and `Easy` buttons are disabled.
-- If you take longer than 15 seconds to answer, the `Easy` button is disabled. 
-- This forces the SM-2 algorithm to give you mathematically honest intervals, preventing you from faking mastery.
+R(t, S) = (1 + factor × t/S)^(−w₂₀)
+where factor = 0.9^(−1/w₂₀) − 1, ensuring R = 90% when t = S
+```
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 19, Vite, Tailwind CSS
+- **Frontend**: React 19, Vite, Tailwind CSS, Recharts
 - **Backend & Database**: Firebase (Firestore, Authentication)
 - **Serverless Functions**: Firebase Cloud Functions (Node.js)
-- **AI Integration**: Google Gemini 3.6 Flash API
+- **AI Integration**: Google Gemini 3.6 Flash API (quiz generation, hints, OCR, semantic grading)
+- **Scheduling Algorithm**: ts-fsrs (FSRS-6 — Open Spaced Repetition)
 
 ## 🚀 Running Locally
 
@@ -65,10 +52,11 @@ graph TD
 2. **Install dependencies**
    ```bash
    npm install
+   cd functions && npm install && cd ..
    ```
 
 3. **Set up Firebase**
-   Create a `.env` file in the root directory and add your Firebase config:
+   Create a `.env` file in the root directory:
    ```env
    VITE_FIREBASE_API_KEY=your_api_key
    VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
@@ -76,6 +64,10 @@ graph TD
    VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
    VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
    VITE_FIREBASE_APP_ID=your_app_id
+   ```
+   Create `functions/.env`:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key
    ```
 
 4. **Start the development server**
@@ -85,4 +77,4 @@ graph TD
 
 ## 📄 License
 
-This project is open-source and available under the MIT License.
+Open-source under the MIT License.
