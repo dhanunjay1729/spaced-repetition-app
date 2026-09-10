@@ -15,19 +15,28 @@ export const createDeck = (data) => {
   };
 };
 
-// Card model with SM-2 algorithm properties
+// Card model with FSRS-6 algorithm properties
+// FSRS replaced SM-2 as the scheduling engine (Anki adopted it Oct 2023).
+// Fields: stability (memory strength in days), difficulty (1-10 scale),
+//         state (New/Learning/Review/Relearning), reps, lapses, due.
 export const createCard = (data) => {
+  const now = new Date().toISOString();
   return {
     deckId: data.deckId,
     question: data.question || '',
     answer: data.answer || '',
-    // SM-2 Algorithm properties
-    interval: 0,        // Days until next review
-    repetitions: 0,     // Number of successful repetitions
-    easeFactor: 2.5,    // Difficulty factor (starts at 2.5)
-    nextReview: new Date().toISOString(), // Next review date
-    lastReviewed: null, // Last review date
-    createdAt: new Date().toISOString()
+    // FSRS-6 memory state fields
+    stability:      0,      // Memory stability in days (grows with each review)
+    difficulty:     0,      // Inherent card difficulty 1-10 (0 = not yet set)
+    elapsed_days:   0,
+    scheduled_days: 0,
+    reps:           0,      // Total review count
+    lapses:         0,      // Times forgotten (Again pressed)
+    state:          0,      // 0=New, 1=Learning, 2=Review, 3=Relearning
+    last_review:    null,
+    due:            now,    // ISO string: when this card is next due
+    nextReview:     now,    // Alias kept for UI components
+    createdAt:      now,
   };
 };
 
@@ -44,10 +53,10 @@ export const createSession = (deckId) => {
   };
 };
 
-// Rating options for SM-2
+// Rating options — FSRS uses 1/2/3/4 (Again/Hard/Good/Easy)
 export const RATING_OPTIONS = {
-  AGAIN: 0,   // Complete blackout
-  HARD: 3,    // Difficult but recalled
-  GOOD: 4,    // Recalled with some effort
-  EASY: 5     // Perfect recall
+  AGAIN: 1,
+  HARD:  2,
+  GOOD:  3,
+  EASY:  4,
 };

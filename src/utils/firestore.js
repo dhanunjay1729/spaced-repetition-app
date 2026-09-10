@@ -113,16 +113,17 @@ export const fetchCards = async (deckId) => {
   }
 };
 
-// Update an existing card with metadata support
+// Update an existing card with FSRS or legacy SM-2 fields
 export const updateCard = async (cardId, updatedData) => {
   try {
-    if (!updatedData.nextReview || isNaN(new Date(updatedData.nextReview).getTime())) {
-      throw new Error('Invalid nextReview date');
+    // Accept either FSRS 'due' or legacy SM-2 'nextReview'
+    const dateToCheck = updatedData.due ?? updatedData.nextReview;
+    if (!dateToCheck || isNaN(new Date(dateToCheck).getTime())) {
+      throw new Error('Invalid due/nextReview date');
     }
     
     const userId = getCurrentUserId();
     
-    // Verify the card belongs to the current user
     const cardQuery = query(collection(db, CARDS_COLLECTION), 
       where("userId", "==", userId),
       where("__name__", "==", cardId));
@@ -132,7 +133,6 @@ export const updateCard = async (cardId, updatedData) => {
       throw new Error('Card not found or access denied');
     }
     
-    // Preserve existing metadata and merge with new metadata if provided
     const cardRef = doc(db, CARDS_COLLECTION, cardId);
     await updateDoc(cardRef, {
       ...updatedData,
@@ -143,6 +143,7 @@ export const updateCard = async (cardId, updatedData) => {
     throw error;
   }
 };
+
 
 // Delete a card
 export const deleteCard = async (cardId) => {

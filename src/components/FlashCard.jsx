@@ -1,29 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import AIService from '../utils/aiService'; // Import AIService for generating hints
+import AIService from '../utils/aiService';
 
-//the flashcard data, including the question, answer, and metadata
+// FlashCard component — handles single card display, flip, hint, and FSRS rating.
+// FSRS rating values: Again=1, Hard=2, Good=3, Easy=4
 const Flashcard = ({ card, onRate }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showRating, setShowRating] = useState(false);
-  const [hint, setHint] = useState(''); // State to store the hint
-  const [loadingHint, setLoadingHint] = useState(false); // State to track hint loading
+  const [hint, setHint] = useState('');
+  const [loadingHint, setLoadingHint] = useState(false);
   const [startTime, setStartTime] = useState(Date.now());
   const [timeTaken, setTimeTaken] = useState(0);
   const [hintUsed, setHintUsed] = useState(false);
 
-  // Reset state when card changes (when a new card is loaded)
   useEffect(() => {
     setIsFlipped(false);
     setShowRating(false);
-    setHint(''); // Clear the hint when a new card is loaded
+    setHint('');
     setHintUsed(false);
     setStartTime(Date.now());
   }, [card.id]);
 
   const handleFlip = () => {
     setIsFlipped(true);
-    setTimeTaken(Date.now() - startTime); // Record how long user thought before flipping
-    // Show rating buttons after a short delay
+    setTimeTaken(Date.now() - startTime);
     setTimeout(() => setShowRating(true), 300);
   };
 
@@ -34,71 +33,54 @@ const Flashcard = ({ card, onRate }) => {
   };
 
   const handleHint = async () => {
-    setLoadingHint(true); // Show loading state for the hint
-    setHintUsed(true); // Penalize score ceiling for using a hint
+    setLoadingHint(true);
+    setHintUsed(true);
     try {
-      const hintResponse = await AIService.generateHint(card.question); // Fetch hint using AI
-      setHint(hintResponse); // Set the hint
+      const hintResponse = await AIService.generateHint(card.question);
+      setHint(hintResponse);
     } catch (error) {
       console.error('Failed to fetch hint:', error);
       setHint('Unable to fetch a hint at the moment. Please try again later.');
     } finally {
-      setLoadingHint(false); // Hide loading state
+      setLoadingHint(false);
     }
   };
 
-  // Check if card is AI-generated
   const isAIGenerated = card.metadata?.isAIGenerated;
 
-  // Format answer for display - preserving original formatting
   const formatAnswer = (answer) => {
     if (!answer) return '';
-
-    // Split by newlines and preserve empty lines
     const lines = answer.split('\n');
-    
     return lines.map((line, index) => {
-      // Check if it's an empty line
-      if (line.trim() === '') {
-        return <br key={index} />;
-      }
-      
-      // Check for special formatted lines (AI-generated content)
+      if (line.trim() === '') return <br key={index} />;
       if (isAIGenerated) {
         if (line.startsWith('Definition:')) {
-          return (
-            <div key={index} className="mb-2">
-              <strong className="text-brand-500">Definition:</strong> {line.substring(11)}
-            </div>
-          );
+          return <div key={index} className="mb-2"><strong className="text-brand-500">Definition:</strong> {line.substring(11)}</div>;
         }
         if (line.startsWith('Examples:')) {
-          return (
-            <div key={index} className="mb-2">
-              <strong className="text-purple-500">Examples:</strong>
-            </div>
-          );
+          return <div key={index} className="mb-2"><strong className="text-purple-500">Examples:</strong></div>;
         }
-        // Handle bullet points or numbered lists
         if (line.match(/^[\d-•*]\s*\.?\s*/)) {
           return <div key={index} className="mb-1 ml-4">{line}</div>;
         }
       }
-      
-      // Default line rendering
       return <div key={index} className="mb-1">{line}</div>;
     });
   };
 
-  // Format question with line breaks preserved
   const formatQuestion = (question) => {
     if (!question) return '';
-    
     const lines = question.split('\n');
     return lines.map((line, index) => (
       line.trim() === '' ? <br key={index} /> : <div key={index}>{line}</div>
     ));
   };
+
+  // Honest review constraints (unchanged logic, updated to FSRS rating values):
+  // Using a hint caps max rating at Hard (2)
+  // Taking >15s caps max rating at Good (3)
+  const isGoodDisabled = hintUsed;
+  const isEasyDisabled = hintUsed || timeTaken > 15000;
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 max-w-full sm:max-w-2xl mx-auto">
@@ -124,17 +106,10 @@ const Flashcard = ({ card, onRate }) => {
               </div>
               {!isFlipped && (
                 <div className="mt-6 flex flex-col items-center gap-3">
-                  <button
-                    onClick={handleFlip}
-                    className="btn-primary text-sm sm:text-base"
-                  >
+                  <button onClick={handleFlip} className="btn-primary text-sm sm:text-base">
                     Show Answer
                   </button>
-                  <button
-                    onClick={handleHint}
-                    className="btn-secondary text-sm sm:text-base"
-                    disabled={loadingHint}
-                  >
+                  <button onClick={handleHint} className="btn-secondary text-sm sm:text-base" disabled={loadingHint}>
                     {loadingHint ? 'Loading Hint...' : 'Show Hint'}
                   </button>
                 </div>
@@ -160,45 +135,46 @@ const Flashcard = ({ card, onRate }) => {
         </div>
       </div>
 
-      {/* Rating buttons */}
+      {/* Rating buttons — FSRS: Again=1, Hard=2, Good=3, Easy=4 */}
       {showRating && (
         <div className="mt-6 sm:mt-8 space-y-4 animate-slide-up">
           <p className="text-center text-gray-500 dark:text-gray-400 mb-3 sm:mb-4 text-sm sm:text-base">How well did you remember?</p>
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <button
-              onClick={() => handleRate(0)}
-              className="px-4 py-3 sm:px-6 sm:py-4 bg-red-500/90 hover:bg-red-600 text-white font-medium rounded-xl transition-all active:scale-[0.97]"
-            >
+
+            <button onClick={() => handleRate(1)}
+              className="px-4 py-3 sm:px-6 sm:py-4 bg-red-500/90 hover:bg-red-600 text-white font-medium rounded-xl transition-all active:scale-[0.97]">
               <span className="block text-base sm:text-lg">Again</span>
               <span className="block text-xs sm:text-sm opacity-70">Didn't remember</span>
             </button>
-            <button
-              onClick={() => handleRate(3)}
-              className="px-4 py-3 sm:px-6 sm:py-4 bg-orange-500/90 hover:bg-orange-600 text-white font-medium rounded-xl transition-all active:scale-[0.97]"
-            >
+
+            <button onClick={() => handleRate(2)}
+              className="px-4 py-3 sm:px-6 sm:py-4 bg-orange-500/90 hover:bg-orange-600 text-white font-medium rounded-xl transition-all active:scale-[0.97]">
               <span className="block text-base sm:text-lg">Hard</span>
               <span className="block text-xs sm:text-sm opacity-70">Difficult recall</span>
             </button>
-            <button
-              onClick={() => handleRate(4)}
-              disabled={hintUsed}
-              className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-xl transition-all active:scale-[0.97] ${hintUsed ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-brand-500/90 hover:bg-brand-600'}`}
-            >
+
+            <button onClick={() => handleRate(3)}
+              disabled={isGoodDisabled}
+              className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-xl transition-all active:scale-[0.97] ${
+                isGoodDisabled ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-brand-500/90 hover:bg-brand-600'
+              }`}>
               <span className="block text-base sm:text-lg">Good</span>
               <span className="block text-xs sm:text-sm opacity-70">
-                {hintUsed ? 'Disabled (Hint used)' : 'Recalled with effort'}
+                {isGoodDisabled ? 'Disabled (Hint used)' : 'Recalled with effort'}
               </span>
             </button>
-            <button
-              onClick={() => handleRate(5)}
-              disabled={hintUsed || timeTaken > 15000}
-              className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-xl transition-all active:scale-[0.97] ${hintUsed || timeTaken > 15000 ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-emerald-500/90 hover:bg-emerald-600'}`}
-            >
+
+            <button onClick={() => handleRate(4)}
+              disabled={isEasyDisabled}
+              className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-xl transition-all active:scale-[0.97] ${
+                isEasyDisabled ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-emerald-500/90 hover:bg-emerald-600'
+              }`}>
               <span className="block text-base sm:text-lg">Easy</span>
               <span className="block text-xs sm:text-sm opacity-70">
-                {hintUsed ? 'Disabled (Hint used)' : (timeTaken > 15000 ? 'Disabled (>15s thought)' : 'Perfect recall')}
+                {hintUsed ? 'Disabled (Hint used)' : timeTaken > 15000 ? 'Disabled (>15s)' : 'Perfect recall'}
               </span>
             </button>
+
           </div>
         </div>
       )}

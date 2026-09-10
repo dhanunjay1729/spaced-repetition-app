@@ -137,17 +137,25 @@ const Quiz = () => {
           deckId: newDeck.id,
           question,
           answer,
-          interval: 0,
-          repetitions: 0,
-          easeFactor: 2.5,
-          nextReview: new Date().toISOString(),
-          lastReviewed: null,
+          // FSRS-6 initial state (new card)
+          stability:      0,
+          difficulty:     0,
+          elapsed_days:   0,
+          scheduled_days: 0,
+          reps:           0,
+          lapses:         0,
+          state:          0,
+          last_review:    null,
+          due:            new Date().toISOString(),
+          nextReview:     new Date().toISOString(),
+          lastReviewed:   null,
           metadata: {
             isAIGenerated: true,
             quizTopic: topic,
             questionType: q.type,
           },
         });
+
       });
 
       await Promise.all(cardPromises);
