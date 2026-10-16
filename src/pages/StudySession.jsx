@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import useCards from '../hooks/useCards';
@@ -9,7 +9,14 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const StudySession = () => {
   const { deckId } = useParams();
+  return <DeckStudySession key={deckId} deckId={deckId} />;
+};
+
+const DeckStudySession = ({ deckId }) => {
   const { cards, updateCard, loading, error } = useCards(deckId);
+  const initialized = useRef(false);
+  const savingRef = useRef(false);
+  const [saving, setSaving] = useState(false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [sessionCards, setSessionCards] = useState([]);
@@ -23,7 +30,10 @@ const StudySession = () => {
   const [sessionComplete, setSessionComplete] = useState(false);
 
   useEffect(() => {
-    if (!loading && cards.length > 0) {
+    // Snapshot the queue once. Saving a review updates `cards`, but must not
+    // restart the session or erase its accumulated statistics.
+    if (!loading && !error && !initialized.current) {
+      initialized.current = true;
       const due = getDueCards(cards);
       setSessionCards(due);
       setSessionStats({
@@ -35,17 +45,20 @@ const StudySession = () => {
       setCurrentIndex(0);
       setSessionComplete(false);
     }
-  }, [cards, loading]);
+  }, [cards, loading, error]);
 
   if (error) return <ErrorMessage message={error} />;
 
-  const handleRate = (rating) => {
-    if (sessionComplete) return;
+  const handleRate = async (rating) => {
+    if (sessionComplete || savingRef.current) return;
     const card = sessionCards[currentIndex];
+    if (!card) return;
+    savingRef.current = true;
+    setSaving(true);
     try {
       // Apply FSRS-6 scheduling (rating: 1=Again, 2=Hard, 3=Good, 4=Easy)
       const updated = updateCardWithFSRS(card, rating);
-      updateCard(card.id, updated);
+      await updateCard(card.id, updated);
 
       setSessionStats(prev => ({
         ...prev,
@@ -70,6 +83,9 @@ const StudySession = () => {
     } catch (err) {
       console.error('Error saving progress:', err);
       toast.error('Failed to save progress!');
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
     }
   };
 
@@ -146,7 +162,7 @@ const StudySession = () => {
         </div>
       </div>
 
-      <Flashcard card={card} onRate={handleRate} />
+      <Flashcard card={card} onRate={handleRate} saving={saving} />
 
       <div className="mt-8 text-center">
         <Link

@@ -44,33 +44,22 @@ function useDecks() {
   // Add a new deck
   const addDeck = async (deckData) => {
     if (!isAuthenticated) {
-      setError("Please log in to create decks.");
-      return;
+      throw new Error("Please log in to create decks.");
     }
 
-    try {
-      const newDeck = await saveDeck(deckData);
-      setDecks([...decks, newDeck]);
-    } catch (error) {
-      handleError(error, 'useDecks-addDeck');
-      setError("Failed to add deck.");
-    }
+    const newDeck = await saveDeck(deckData);
+    setDecks(prevDecks => [...prevDecks, newDeck]);
+    return newDeck;
   };
 
   // Delete a deck
   const deleteDeck = async (deckId) => {
     if (!isAuthenticated) {
-      setError("Please log in to delete decks.");
-      return;
+      throw new Error("Please log in to delete decks.");
     }
 
-    try {
-      await firestoreDeleteDeck(deckId);
-      setDecks(decks.filter((deck) => deck.id !== deckId));
-    } catch (error) {
-      handleError(error, 'useDecks-removeDeck');
-      setError("Failed to delete deck.");
-    }
+    await firestoreDeleteDeck(deckId);
+    setDecks(prevDecks => prevDecks.filter(deck => deck.id !== deckId));
   };
 
   return { decks, loading, error, addDeck, deleteDeck };

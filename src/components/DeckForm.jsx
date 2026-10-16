@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 
 const DeckForm = ({ onSubmit, onCancel, initialData }) => {
+    const [isSaving, setIsSaving] = useState(false);
+    const savingRef = useRef(false);
     const [formData, setFormData] = useState(
         initialData || { name: '', description: '' }
     );
@@ -10,27 +12,29 @@ const DeckForm = ({ onSubmit, onCancel, initialData }) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (savingRef.current) return;
         if (!formData.name.trim()) {
             toast.error('Deck name is required!');
             return;
         }
+        savingRef.current = true;
+        setIsSaving(true);
         try {
-            if (initialData) {
-                onSubmit({ ...formData, id: initialData.id });
-                toast.success('Deck updated!');
-            } else {
-                onSubmit(formData);
-                toast.success('Deck created!');
-            }
-        } catch (err) {
+            await onSubmit(formData);
+            toast.success(initialData ? 'Deck updated!' : 'Deck created!');
+        } catch {
             toast.error('Failed to save deck!');
+        } finally {
+            savingRef.current = false;
+            setIsSaving(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="glass-elevated rounded-2xl p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="glass-elevated rounded-2xl p-6" aria-busy={isSaving}>
+          <fieldset disabled={isSaving} className="space-y-4">
             <div>
                 <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200 text-sm">Deck Name</label>
                 <input
@@ -58,7 +62,7 @@ const DeckForm = ({ onSubmit, onCancel, initialData }) => {
                     type="submit"
                     className="btn-primary text-sm"
                 >
-                    {initialData ? 'Update Deck' : 'Create Deck'}
+                    {isSaving ? 'Saving...' : initialData ? 'Update Deck' : 'Create Deck'}
                 </button>
                 <button
                     type="button"
@@ -68,6 +72,7 @@ const DeckForm = ({ onSubmit, onCancel, initialData }) => {
                     Cancel
                 </button>
             </div>
+          </fieldset>
         </form>
     );
 };

@@ -9,7 +9,7 @@ import { Menu, X, Sun, Moon } from 'lucide-react';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -18,7 +18,7 @@ const Header = () => {
       await signOut(auth);
       toast.success('Logged out successfully');
       navigate('/login');
-    } catch (error) {
+    } catch {
       toast.error('Failed to log out');
     }
   };

@@ -38,45 +38,30 @@ function useCards(deckId = null) {
   }, [deckId, isAuthenticated, userId]);
 
   const addCard = async (cardData) => {
-    if (!isAuthenticated) { setError("Please log in to add cards."); return; }
-    try {
-      const newCard = await saveCard(cardData);
-      setCards([...cards, newCard]);
-    } catch (err) {
-      handleError(err, 'useCards - addCard');
-      setError("Failed to add card.");
-    }
+    if (!isAuthenticated) throw new Error("Please log in to add cards.");
+    const newCard = await saveCard(cardData);
+    setCards(prevCards => [...prevCards, newCard]);
+    return newCard;
   };
 
   const deleteCard = async (cardId) => {
-    if (!isAuthenticated) { setError("Please log in to delete cards."); return; }
-    try {
-      await firestoreDeleteCard(cardId);
-      setCards(cards.filter(card => card.id !== cardId));
-    } catch (err) {
-      handleError(err, 'useCards - deleteCard');
-      setError("Failed to delete card.");
-    }
+    if (!isAuthenticated) throw new Error("Please log in to delete cards.");
+    await firestoreDeleteCard(cardId);
+    setCards(prevCards => prevCards.filter(card => card.id !== cardId));
   };
 
   // Update a card — accepts FSRS fields (due, stability, difficulty, etc.)
   const updateCard = async (cardId, updatedData) => {
-    if (!isAuthenticated) { setError("Please log in to update cards."); return; }
-    try {
-      // Validate due date (FSRS) or nextReview (legacy SM-2)
-      const dateToCheck = updatedData.due ?? updatedData.nextReview;
-      if (!dateToCheck || isNaN(new Date(dateToCheck).getTime())) {
-        throw new Error('Invalid due/nextReview date');
-      }
-      await firestoreUpdateCard(cardId, updatedData);
-      setCards(prevCards =>
-        prevCards.map(card => card.id === cardId ? { ...card, ...updatedData } : card)
-      );
-    } catch (err) {
-      handleError(err, 'useCards - updateCard');
-      setError("Failed to update card.");
-      throw err;
+    if (!isAuthenticated) throw new Error("Please log in to update cards.");
+    // Validate due date (FSRS) or nextReview (legacy SM-2)
+    const dateToCheck = updatedData.due ?? updatedData.nextReview;
+    if (!dateToCheck || isNaN(new Date(dateToCheck).getTime())) {
+      throw new Error('Invalid due/nextReview date');
     }
+    await firestoreUpdateCard(cardId, updatedData);
+    setCards(prevCards =>
+      prevCards.map(card => card.id === cardId ? { ...card, ...updatedData } : card)
+    );
   };
 
   return { cards, loading, error, addCard, deleteCard, updateCard };

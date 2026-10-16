@@ -36,13 +36,8 @@ const DeckManager = () => {
   }, [decks]);
 
   const handleCreateDeck = async (deckData) => {
-    try {
-      await addDeck(deckData);
-      setShowForm(false);
-      toast.success('Deck created!');
-    } catch (err) {
-      toast.error('Failed to create deck!');
-    }
+    await addDeck(deckData);
+    setShowForm(false);
   };
 
   const handleDeleteDeck = (deckId) => {

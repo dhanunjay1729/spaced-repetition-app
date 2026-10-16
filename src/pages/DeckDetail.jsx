@@ -7,6 +7,7 @@ import useDecks from '../hooks/useDecks';
 import useCards from '../hooks/useCards';
 import CardForm from '../components/CardForm';
 import ErrorMessage from '../components/ErrorMessage';
+import LoadingSpinner from '../components/LoadingSpinner';
 import StudyProgress from '../components/StudyProgress';
 import ForgettingCurve from '../components/ForgettingCurve';
 import { createCard } from '../data/models';
@@ -22,8 +23,8 @@ const STATE_COLORS = {
 
 const DeckDetail = () => {
   const { deckId } = useParams();
-  const { decks } = useDecks();
-  const { cards, error, addCard, updateCard, deleteCard } = useCards(deckId);
+  const { decks, loading: loadingDecks, error: deckError } = useDecks();
+  const { cards, loading: loadingCards, error, addCard, updateCard, deleteCard } = useCards(deckId);
 
   const [showForm, setShowForm] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
@@ -32,36 +33,24 @@ const DeckDetail = () => {
 
   const deck = decks.find(d => d.id === deckId);
 
-  if (error) return <ErrorMessage message={error} />;
+  if (error || deckError) return <ErrorMessage message={error || deckError} />;
+  if (loadingDecks || loadingCards) return <LoadingSpinner />;
 
   const handleToggleExpand = (cardId) => {
     setExpandedCard(prev => prev === cardId ? null : cardId);
   };
 
-  const handleCreateCard = (cardData) => {
-    try {
-      const newCard = createCard({ ...cardData, deckId });
-      addCard(newCard);
-      setShowForm(false);
-      toast.success('Card added!');
-    } catch (err) {
-      toast.error('Failed to add card!');
-    }
+  const handleCreateCard = async (cardData) => {
+    const newCard = createCard({ ...cardData, deckId });
+    await addCard(newCard);
+    setShowForm(false);
   };
 
-  const handleUpdateCard = (cardData) => {
-    try {
-      const dateToCheck = cardData.due ?? cardData.nextReview;
-      if (!dateToCheck || isNaN(new Date(dateToCheck).getTime())) {
-        throw new Error('Invalid due date');
-      }
-      updateCard(cardData.id, cardData);
-      setShowForm(false);
-      setEditingCard(null);
-      toast.success('Card updated!');
-    } catch (err) {
-      toast.error('Failed to update card!');
-    }
+  const handleUpdateCard = async (cardData) => {
+    const { id, ...updatedData } = cardData;
+    await updateCard(id, updatedData);
+    setShowForm(false);
+    setEditingCard(null);
   };
 
   const handleDeleteCard = (cardId) => {
@@ -75,7 +64,7 @@ const DeckDetail = () => {
             try {
               await deleteCard(cardId);
               toast.success('Card deleted successfully!', { icon: '🗑️' });
-            } catch (err) {
+            } catch {
               toast.error('Failed to delete card!');
             }
           },
@@ -137,6 +126,7 @@ const DeckDetail = () => {
       {showForm && (
         <div className="mb-8 animate-slide-up">
           <CardForm
+            key={editingCard?.id ?? 'new'}
             onSubmit={editingCard ? handleUpdateCard : handleCreateCard}
             onCancel={() => { setShowForm(false); setEditingCard(null); }}
             initialData={editingCard}

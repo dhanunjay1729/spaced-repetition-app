@@ -42,7 +42,7 @@ General Principles:
     let parsedResult;
     try {
       parsedResult = JSON.parse(text);
-    } catch (e) {
+    } catch {
       parsedResult = text.trim();
     }
 
@@ -147,7 +147,7 @@ You MUST return a JSON array of exactly 10 objects with this exact schema:
     let quiz;
     try {
       quiz = JSON.parse(cleaned);
-    } catch (parseError) {
+    } catch {
       console.error('Failed to parse quiz JSON:', cleaned);
       throw new HttpsError('internal', 'AI returned invalid quiz format. Please try again.');
     }

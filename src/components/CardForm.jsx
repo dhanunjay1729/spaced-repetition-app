@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import aiService from '../utils/aiService';
 
@@ -9,6 +9,8 @@ const CardForm = ({ onSubmit, onCancel, initialData }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
   const [aiGenerated, setAiGenerated] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const savingRef = useRef(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -75,8 +77,9 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (savingRef.current || isGenerating || isExtracting) return;
 
     if (formData.question.trim().length === 0) {
       return toast.error('Question is required');
@@ -85,18 +88,30 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
       return toast.error(`Question too long. Maximum ${MAX_QUESTION_LENGTH} characters allowed.`);
     }
 
-    const nextReview = initialData?.nextReview || new Date().toISOString();
-    onSubmit({
-      ...formData,
-      nextReview,
-      metadata: aiGenerated ? { isAIGenerated: true, generatedAt: new Date().toISOString() } : {},
-      id: initialData?.id,
-    });
-    toast.success(initialData ? 'Card updated!' : 'Card created!');
+    savingRef.current = true;
+    setIsSaving(true);
+    try {
+      const nextReview = initialData?.nextReview || new Date().toISOString();
+      await onSubmit({
+        ...formData,
+        nextReview,
+        metadata: {
+          ...initialData?.metadata,
+          ...(aiGenerated ? { isAIGenerated: true, generatedAt: new Date().toISOString() } : {}),
+        },
+      });
+      toast.success(initialData ? 'Card updated!' : 'Card created!');
+    } catch {
+      toast.error('Failed to save card!');
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="glass-elevated rounded-2xl p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="glass-elevated rounded-2xl p-6" aria-busy={isSaving}>
+      <fieldset disabled={isSaving} className="space-y-4">
       <div>
         <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200 text-sm">Question</label>
         <div className="flex gap-2">
@@ -143,9 +158,10 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
       <div className="flex gap-3">
         <button
           type="submit"
+          disabled={isGenerating || isExtracting}
           className="btn-primary text-sm"
         >
-          {initialData ? 'Update Card' : 'Add Card'}
+          {isSaving ? 'Saving...' : initialData ? 'Update Card' : 'Add Card'}
         </button>
         <button
           type="button"
@@ -155,6 +171,7 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
           Cancel
         </button>
       </div>
+      </fieldset>
     </form>
   );
 };

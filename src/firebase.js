@@ -29,8 +29,8 @@ export const auth = getAuth(app); // Export the auth object
 export const db = getFirestore(app);
 
 // Initialize analytics only in production
-if (process.env.NODE_ENV === "production") {
-  const analytics = getAnalytics(app);
+if (import.meta.env.PROD) {
+  getAnalytics(app);
 }
 
 // Helper function to get current user

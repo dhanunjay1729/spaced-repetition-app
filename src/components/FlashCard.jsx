@@ -3,7 +3,7 @@ import AIService from '../utils/aiService';
 
 // FlashCard component — handles single card display, flip, hint, and FSRS rating.
 // FSRS rating values: Again=1, Hard=2, Good=3, Easy=4
-const Flashcard = ({ card, onRate }) => {
+const Flashcard = ({ card, onRate, saving = false }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [hint, setHint] = useState('');
@@ -28,8 +28,6 @@ const Flashcard = ({ card, onRate }) => {
 
   const handleRate = (rating) => {
     onRate(rating);
-    setIsFlipped(false);
-    setShowRating(false);
   };
 
   const handleHint = async () => {
@@ -138,23 +136,27 @@ const Flashcard = ({ card, onRate }) => {
       {/* Rating buttons — FSRS: Again=1, Hard=2, Good=3, Easy=4 */}
       {showRating && (
         <div className="mt-6 sm:mt-8 space-y-4 animate-slide-up">
-          <p className="text-center text-gray-500 dark:text-gray-400 mb-3 sm:mb-4 text-sm sm:text-base">How well did you remember?</p>
+          <p role="status" className="text-center text-gray-500 dark:text-gray-400 mb-3 sm:mb-4 text-sm sm:text-base">
+            {saving ? 'Saving progress...' : 'How well did you remember?'}
+          </p>
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
 
             <button onClick={() => handleRate(1)}
+              disabled={saving}
               className="px-4 py-3 sm:px-6 sm:py-4 bg-red-500/90 hover:bg-red-600 text-white font-medium rounded-xl transition-all active:scale-[0.97]">
               <span className="block text-base sm:text-lg">Again</span>
               <span className="block text-xs sm:text-sm opacity-70">Didn't remember</span>
             </button>
 
             <button onClick={() => handleRate(2)}
+              disabled={saving}
               className="px-4 py-3 sm:px-6 sm:py-4 bg-orange-500/90 hover:bg-orange-600 text-white font-medium rounded-xl transition-all active:scale-[0.97]">
               <span className="block text-base sm:text-lg">Hard</span>
               <span className="block text-xs sm:text-sm opacity-70">Difficult recall</span>
             </button>
 
             <button onClick={() => handleRate(3)}
-              disabled={isGoodDisabled}
+              disabled={saving || isGoodDisabled}
               className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-xl transition-all active:scale-[0.97] ${
                 isGoodDisabled ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-brand-500/90 hover:bg-brand-600'
               }`}>
@@ -165,7 +167,7 @@ const Flashcard = ({ card, onRate }) => {
             </button>
 
             <button onClick={() => handleRate(4)}
-              disabled={isEasyDisabled}
+              disabled={saving || isEasyDisabled}
               className={`px-4 py-3 sm:px-6 sm:py-4 text-white font-medium rounded-xl transition-all active:scale-[0.97] ${
                 isEasyDisabled ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-emerald-500/90 hover:bg-emerald-600'
               }`}>
