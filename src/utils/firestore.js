@@ -37,6 +37,30 @@ export const loadDecks = async () => {
   }
 };
 
+// Update an existing deck
+export const updateDeck = async (deckId, updatedData) => {
+  try {
+    const userId = getCurrentUserId();
+    const deckDoc = await getDocs(query(collection(db, DECKS_COLLECTION), 
+      where("userId", "==", userId), 
+      where("__name__", "==", deckId)));
+    
+    if (deckDoc.empty) {
+      throw new Error('Deck not found or access denied');
+    }
+    
+    const deckRef = doc(db, DECKS_COLLECTION, deckId);
+    await updateDoc(deckRef, {
+      ...updatedData,
+      lastUpdated: new Date().toISOString()
+    });
+    return { id: deckId, ...updatedData };
+  } catch (error) {
+    handleError(error, 'firestore-updateDeck');
+    throw error;
+  }
+};
+
 // Delete a deck
 export const deleteDeck = async (deckId) => {
   try {

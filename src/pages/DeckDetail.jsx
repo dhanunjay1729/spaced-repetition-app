@@ -23,18 +23,44 @@ const STATE_COLORS = {
 
 const DeckDetail = () => {
   const { deckId } = useParams();
-  const { decks, loading: loadingDecks, error: deckError } = useDecks();
+  const { decks, loading: loadingDecks, error: deckError, updateDeck } = useDecks();
   const { cards, loading: loadingCards, error, addCard, updateCard, deleteCard } = useCards(deckId);
 
   const [showForm, setShowForm] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
   // Track which card is expanded (showing forgetting curve)
   const [expandedCard, setExpandedCard] = useState(null);
+  const [isEditingDeck, setIsEditingDeck] = useState(false);
+  const [deckName, setDeckName] = useState('');
+  const [deckDescription, setDeckDescription] = useState('');
 
   const deck = decks.find(d => d.id === deckId);
 
   if (error || deckError) return <ErrorMessage message={error || deckError} />;
   if (loadingDecks || loadingCards) return <LoadingSpinner />;
+
+  const handleStartEditDeck = () => {
+    setDeckName(deck?.name || '');
+    setDeckDescription(deck?.description || '');
+    setIsEditingDeck(true);
+  };
+
+  const handleSaveDeckInfo = async (e) => {
+    e.preventDefault();
+    if (!deckName.trim()) {
+      return toast.error('Deck name is required!');
+    }
+    try {
+      await updateDeck(deckId, {
+        name: deckName.trim(),
+        description: deckDescription.trim(),
+      });
+      setIsEditingDeck(false);
+      toast.success('Deck updated successfully!');
+    } catch {
+      toast.error('Failed to update deck!');
+    }
+  };
 
   const handleToggleExpand = (cardId) => {
     setExpandedCard(prev => prev === cardId ? null : cardId);
@@ -86,13 +112,62 @@ const DeckDetail = () => {
     <div className="container mx-auto p-6 max-w-5xl">
       {/* Header */}
       <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in">
-        <div>
+        <div className="flex-1">
           <Link to="/decks" className="text-brand-500 hover:text-brand-600 mb-2 inline-block transition-colors text-sm font-medium">
             ← Back to Decks
           </Link>
-          <h1 className="text-4xl font-extrabold mb-1 text-gray-800 dark:text-white">{deck.name}</h1>
-          {deck.description && (
-            <p className="text-lg text-gray-500 dark:text-gray-400 mb-1">{deck.description}</p>
+          {isEditingDeck ? (
+            <form onSubmit={handleSaveDeckInfo} className="glass p-4 rounded-xl space-y-3 max-w-lg mb-2">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Deck Name</label>
+                <input
+                  type="text"
+                  value={deckName}
+                  onChange={(e) => setDeckName(e.target.value)}
+                  className="input-field text-lg font-bold"
+                  placeholder="Deck Name"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Description</label>
+                <textarea
+                  value={deckDescription}
+                  onChange={(e) => setDeckDescription(e.target.value)}
+                  className="input-field text-sm min-h-[60px]"
+                  placeholder="Optional description..."
+                />
+              </div>
+              <div className="flex gap-2">
+                <button type="submit" className="btn-primary text-xs py-1.5 px-3">
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingDeck(false)}
+                  className="btn-secondary text-xs py-1.5 px-3"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <h1 className="text-4xl font-extrabold mb-1 text-gray-800 dark:text-white">{deck.name}</h1>
+                <button
+                  onClick={handleStartEditDeck}
+                  className="text-gray-400 hover:text-brand-500 dark:hover:text-brand-400 transition-colors p-1 text-lg"
+                  title="Edit Deck Name"
+                  aria-label="Edit Deck Name"
+                >
+                  ✎
+                </button>
+              </div>
+              {deck.description && (
+                <p className="text-lg text-gray-500 dark:text-gray-400 mb-1">{deck.description}</p>
+              )}
+            </>
           )}
           <p className="text-sm text-gray-400 dark:text-gray-500">
             {cards.length} {cards.length === 1 ? 'card' : 'cards'}

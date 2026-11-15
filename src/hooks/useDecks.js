@@ -1,6 +1,6 @@
 // hooks/useDecks.js
 import { useState, useEffect } from "react";
-import { saveDeck, loadDecks, deleteDeck as firestoreDeleteDeck } from "../utils/firestore";
+import { saveDeck, loadDecks, deleteDeck as firestoreDeleteDeck, updateDeck as firestoreUpdateDeck } from "../utils/firestore";
 import { handleError } from '../utils/errorHandler';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -52,6 +52,18 @@ function useDecks() {
     return newDeck;
   };
 
+  // Update an existing deck
+  const updateDeck = async (deckId, updatedData) => {
+    if (!isAuthenticated) {
+      throw new Error("Please log in to update decks.");
+    }
+
+    await firestoreUpdateDeck(deckId, updatedData);
+    setDecks(prevDecks =>
+      prevDecks.map(deck => deck.id === deckId ? { ...deck, ...updatedData } : deck)
+    );
+  };
+
   // Delete a deck
   const deleteDeck = async (deckId) => {
     if (!isAuthenticated) {
@@ -62,7 +74,7 @@ function useDecks() {
     setDecks(prevDecks => prevDecks.filter(deck => deck.id !== deckId));
   };
 
-  return { decks, loading, error, addDeck, deleteDeck };
+  return { decks, loading, error, addDeck, updateDeck, deleteDeck };
 }
 
 export default useDecks;

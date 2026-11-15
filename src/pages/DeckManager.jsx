@@ -9,8 +9,9 @@ import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 
 const DeckManager = () => {
-  const { decks, loading, error, addDeck, deleteDeck } = useDecks();
+  const { decks, loading, error, addDeck, updateDeck, deleteDeck } = useDecks();
   const [showForm, setShowForm] = useState(false);
+  const [editingDeck, setEditingDeck] = useState(null);
   const [cardCounts, setCardCounts] = useState({});
   const [loadingCards, setLoadingCards] = useState(true);
 
@@ -35,9 +36,23 @@ const DeckManager = () => {
     }
   }, [decks]);
 
-  const handleCreateDeck = async (deckData) => {
-    await addDeck(deckData);
+  const handleSaveDeck = async (deckData) => {
+    if (editingDeck) {
+      await updateDeck(editingDeck.id, {
+        name: deckData.name,
+        description: deckData.description || ''
+      });
+      setEditingDeck(null);
+    } else {
+      await addDeck(deckData);
+    }
     setShowForm(false);
+  };
+
+  const handleEditDeck = (deck) => {
+    setEditingDeck(deck);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDeleteDeck = (deckId) => {
@@ -98,8 +113,13 @@ const DeckManager = () => {
         {showForm && (
           <div className="mb-8 animate-slide-up">
             <DeckForm
-              onSubmit={handleCreateDeck}
-              onCancel={() => setShowForm(false)}
+              key={editingDeck ? editingDeck.id : 'new'}
+              initialData={editingDeck}
+              onSubmit={handleSaveDeck}
+              onCancel={() => {
+                setShowForm(false);
+                setEditingDeck(null);
+              }}
             />
           </div>
         )}
@@ -132,19 +152,27 @@ const DeckManager = () => {
                     {cardCounts[deck.id] || 0} {cardCounts[deck.id] === 1 ? 'card' : 'cards'}
                   </p>
                 )}
-                <div className="flex justify-between mt-5 pt-4 border-t border-gray-200/50 dark:border-white/10">
+                <div className="flex justify-between items-center mt-5 pt-4 border-t border-gray-200/50 dark:border-white/10">
                   <Link
                     to={`/deck/${deck.id}`}
                     className="text-brand-500 hover:text-brand-600 font-medium text-sm transition-colors"
                   >
                     View Deck →
                   </Link>
-                  <button
-                    onClick={() => handleDeleteDeck(deck.id)}
-                    className="text-red-400 hover:text-red-500 font-medium text-sm transition-colors"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleEditDeck(deck)}
+                      className="text-gray-500 dark:text-gray-400 hover:text-brand-500 dark:hover:text-brand-400 font-medium text-sm transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteDeck(deck.id)}
+                      className="text-red-400 hover:text-red-500 font-medium text-sm transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
