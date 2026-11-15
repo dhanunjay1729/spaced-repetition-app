@@ -22,7 +22,15 @@ function useCards(deckId = null) {
         setLoading(true);
         setError(null);
         const loadedCards = await fetchCards(deckId);
-        setCards(loadedCards);
+        const sortedCards = [...loadedCards].sort((a, b) => {
+          const orderA = typeof a.order === 'number' ? a.order : Infinity;
+          const orderB = typeof b.order === 'number' ? b.order : Infinity;
+          if (orderA !== orderB) return orderA - orderB;
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return timeA - timeB;
+        });
+        setCards(sortedCards);
       } catch (err) {
         handleError(err, 'useCards - fetchCardsData');
         if (err.message === 'No authenticated user found') {
@@ -50,13 +58,14 @@ function useCards(deckId = null) {
     setCards(prevCards => prevCards.filter(card => card.id !== cardId));
   };
 
-  // Update a card — accepts FSRS fields (due, stability, difficulty, etc.)
+  // Update a card — accepts FSRS fields (due, stability, difficulty, etc.) or partial edits
   const updateCard = async (cardId, updatedData) => {
     if (!isAuthenticated) throw new Error("Please log in to update cards.");
-    // Validate due date (FSRS) or nextReview (legacy SM-2)
-    const dateToCheck = updatedData.due ?? updatedData.nextReview;
-    if (!dateToCheck || isNaN(new Date(dateToCheck).getTime())) {
-      throw new Error('Invalid due/nextReview date');
+    if (updatedData.due !== undefined || updatedData.nextReview !== undefined) {
+      const dateToCheck = updatedData.due ?? updatedData.nextReview;
+      if (!dateToCheck || isNaN(new Date(dateToCheck).getTime())) {
+        throw new Error('Invalid due/nextReview date');
+      }
     }
     await firestoreUpdateCard(cardId, updatedData);
     setCards(prevCards =>
@@ -64,7 +73,27 @@ function useCards(deckId = null) {
     );
   };
 
-  return { cards, loading, error, addCard, deleteCard, updateCard };
+  // Reorder cards in a deck and persist order indices
+  const reorderCards = async (newOrderedCards) => {
+    if (!isAuthenticated) throw new Error("Please log in to reorder cards.");
+    const updated = newOrderedCards.map((card, index) => ({
+      ...card,
+      order: index
+    }));
+    setCards(updated);
+
+    try {
+      const updatePromises = updated.map((card) =>
+        firestoreUpdateCard(card.id, { order: card.order })
+      );
+      await Promise.all(updatePromises);
+    } catch (err) {
+      handleError(err, 'useCards - reorderCards');
+      throw err;
+    }
+  };
+
+  return { cards, loading, error, addCard, deleteCard, updateCard, reorderCards };
 }
 
 export default useCards;

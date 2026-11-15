@@ -25,6 +25,7 @@ export const createCard = (data) => {
     deckId: data.deckId,
     question: data.question || '',
     answer: data.answer || '',
+    order: data.order !== undefined ? data.order : 0,
     metadata: data.metadata || {},
     // FSRS-6 memory state fields
     stability:      0,      // Memory stability in days (grows with each review)

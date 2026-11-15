@@ -101,10 +101,11 @@ export const saveCard = async (cardData) => {
     
     const userId = getCurrentUserId();
     
-    // Ensure metadata is included if present
+    // Ensure metadata and order are included if present
     const dataToSave = {
       ...cardData,
       userId,
+      order: cardData.order !== undefined ? cardData.order : 0,
       metadata: cardData.metadata || {},
       createdAt: new Date().toISOString()
     };
@@ -140,10 +141,12 @@ export const fetchCards = async (deckId) => {
 // Update an existing card with FSRS or legacy SM-2 fields
 export const updateCard = async (cardId, updatedData) => {
   try {
-    // Accept either FSRS 'due' or legacy SM-2 'nextReview'
-    const dateToCheck = updatedData.due ?? updatedData.nextReview;
-    if (!dateToCheck || isNaN(new Date(dateToCheck).getTime())) {
-      throw new Error('Invalid due/nextReview date');
+    // If due or nextReview is being updated, validate the date
+    if (updatedData.due !== undefined || updatedData.nextReview !== undefined) {
+      const dateToCheck = updatedData.due ?? updatedData.nextReview;
+      if (!dateToCheck || isNaN(new Date(dateToCheck).getTime())) {
+        throw new Error('Invalid due/nextReview date');
+      }
     }
     
     const userId = getCurrentUserId();

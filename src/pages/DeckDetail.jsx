@@ -24,7 +24,7 @@ const STATE_COLORS = {
 const DeckDetail = () => {
   const { deckId } = useParams();
   const { decks, loading: loadingDecks, error: deckError, updateDeck } = useDecks();
-  const { cards, loading: loadingCards, error, addCard, updateCard, deleteCard } = useCards(deckId);
+  const { cards, loading: loadingCards, error, addCard, updateCard, deleteCard, reorderCards } = useCards(deckId);
 
   const [showForm, setShowForm] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
@@ -33,6 +33,8 @@ const DeckDetail = () => {
   const [isEditingDeck, setIsEditingDeck] = useState(false);
   const [deckName, setDeckName] = useState('');
   const [deckDescription, setDeckDescription] = useState('');
+  const [draggedCardIndex, setDraggedCardIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
 
   const deck = decks.find(d => d.id === deckId);
 
@@ -67,9 +69,55 @@ const DeckDetail = () => {
   };
 
   const handleCreateCard = async (cardData) => {
-    const newCard = createCard({ ...cardData, deckId });
+    const newCard = createCard({ ...cardData, deckId, order: cards.length });
     await addCard(newCard);
     setShowForm(false);
+  };
+
+  const handleMoveCard = async (fromIndex, toIndex) => {
+    if (toIndex < 0 || toIndex >= cards.length || fromIndex === toIndex) return;
+    const newCards = [...cards];
+    const [movedCard] = newCards.splice(fromIndex, 1);
+    newCards.splice(toIndex, 0, movedCard);
+    try {
+      await reorderCards(newCards);
+      toast.success('Card order updated!', { id: 'card-reorder' });
+    } catch {
+      toast.error('Failed to save card order!');
+    }
+  };
+
+  const handleDragStart = (e, index) => {
+    setDraggedCardIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    if (draggedCardIndex === null || draggedCardIndex === index) return;
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handleDragLeave = (index) => {
+    if (dragOverIndex === index) {
+      setDragOverIndex(null);
+    }
+  };
+
+  const handleDrop = async (e, targetIndex) => {
+    e.preventDefault();
+    setDragOverIndex(null);
+    if (draggedCardIndex === null || draggedCardIndex === targetIndex) return;
+    const from = draggedCardIndex;
+    setDraggedCardIndex(null);
+    await handleMoveCard(from, targetIndex);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedCardIndex(null);
+    setDragOverIndex(null);
   };
 
   const handleUpdateCard = async (cardData) => {
@@ -220,17 +268,31 @@ const DeckDetail = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {cards.map(card => {
+          {cards.length > 1 && (
+            <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500 px-1">
+              <span>Drag cards or use ↑ / ↓ buttons to rearrange in your preferred order.</span>
+              <span>{cards.length} cards</span>
+            </div>
+          )}
+          {cards.map((card, index) => {
             const isExpanded = expandedCard === card.id;
             const stateKey = card.state ?? 0;
             const dueDate = card.due ?? card.nextReview;
             const isDue = dueDate && new Date(dueDate) <= new Date();
+            const isBeingDragged = draggedCardIndex === index;
+            const isDropTarget = dragOverIndex === index;
 
             return (
               <div
                 key={card.id}
-                className={`glass-elevated rounded-2xl overflow-hidden transition-all duration-300 ${
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragLeave={() => handleDragLeave(index)}
+                onDrop={(e) => handleDrop(e, index)}
+                onDragEnd={handleDragEnd}
+                className={`glass-elevated rounded-2xl overflow-hidden transition-all duration-200 ${
                   isExpanded ? 'ring-1 ring-brand-500/40' : ''
+                } ${isDropTarget ? 'ring-2 ring-brand-500 shadow-lg scale-[1.01]' : ''} ${
+                  isBeingDragged ? 'opacity-40' : ''
                 }`}
               >
                 {/* Card header row — click to expand/collapse */}
@@ -238,6 +300,25 @@ const DeckDetail = () => {
                   className="flex items-center gap-3 p-5 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                   onClick={() => handleToggleExpand(card.id)}
                 >
+                  {/* Drag Handle */}
+                  <div
+                    draggable={true}
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 px-1 py-1 -ml-1 rounded flex items-center shrink-0"
+                    title="Drag to rearrange card"
+                    aria-label="Drag to rearrange card"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <circle cx="9" cy="6" r="1.5" />
+                      <circle cx="15" cy="6" r="1.5" />
+                      <circle cx="9" cy="12" r="1.5" />
+                      <circle cx="15" cy="12" r="1.5" />
+                      <circle cx="9" cy="18" r="1.5" />
+                      <circle cx="15" cy="18" r="1.5" />
+                    </svg>
+                  </div>
+
                   {/* FSRS state badge */}
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${STATE_COLORS[stateKey]}`}>
                     {STATE_LABELS[stateKey]}
@@ -271,11 +352,29 @@ const DeckDetail = () => {
                     {isExpanded ? '▲' : '▼'}
                   </span>
 
-                  {/* Edit / Delete buttons */}
-                  <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                  {/* Reorder and Edit / Delete buttons */}
+                  <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={() => handleMoveCard(index, index - 1)}
+                      disabled={index === 0}
+                      className="w-7 h-7 flex items-center justify-center text-gray-400 bg-gray-100 dark:bg-white/10 rounded-full hover:bg-brand-100 hover:text-brand-500 dark:hover:bg-brand-500/20 disabled:opacity-20 disabled:pointer-events-none transition-all text-xs"
+                      title="Move Up"
+                      aria-label="Move Card Up"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={() => handleMoveCard(index, index + 1)}
+                      disabled={index === cards.length - 1}
+                      className="w-7 h-7 flex items-center justify-center text-gray-400 bg-gray-100 dark:bg-white/10 rounded-full hover:bg-brand-100 hover:text-brand-500 dark:hover:bg-brand-500/20 disabled:opacity-20 disabled:pointer-events-none transition-all text-xs"
+                      title="Move Down"
+                      aria-label="Move Card Down"
+                    >
+                      ↓
+                    </button>
                     <button
                       onClick={() => handleEditCard(card)}
-                      className="w-7 h-7 flex items-center justify-center text-gray-400 bg-gray-100 dark:bg-white/10 rounded-full hover:bg-brand-100 hover:text-brand-500 dark:hover:bg-brand-500/20 transition-all text-xs"
+                      className="w-7 h-7 flex items-center justify-center text-gray-400 bg-gray-100 dark:bg-white/10 rounded-full hover:bg-brand-100 hover:text-brand-500 dark:hover:bg-brand-500/20 transition-all text-xs ml-1"
                       title="Edit Card"
                     >
                       ✎
