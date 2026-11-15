@@ -12,6 +12,7 @@ const DeckManager = () => {
   const { decks, loading, error, addDeck, updateDeck, deleteDeck } = useDecks();
   const [showForm, setShowForm] = useState(false);
   const [editingDeck, setEditingDeck] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [cardCounts, setCardCounts] = useState({});
   const [loadingCards, setLoadingCards] = useState(true);
 
@@ -80,6 +81,14 @@ const DeckManager = () => {
     });
   };
 
+  const filteredDecks = decks.filter((deck) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    const nameMatch = deck.name?.toLowerCase().includes(query);
+    const descMatch = deck.description?.toLowerCase().includes(query);
+    return Boolean(nameMatch || descMatch);
+  });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -137,46 +146,101 @@ const DeckManager = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {decks.map((deck) => (
-              <div
-                key={deck.id}
-                className="glass-elevated rounded-2xl p-6 hover:scale-[1.02] transition-all duration-200 animate-slide-up"
-              >
-                <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">{deck.name}</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm">{deck.description || 'No description'}</p>
-                {loadingCards ? (
-                  <p className="text-gray-400 dark:text-gray-500 text-sm">Loading cards...</p>
-                ) : (
-                  <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">
-                    {cardCounts[deck.id] || 0} {cardCounts[deck.id] === 1 ? 'card' : 'cards'}
-                  </p>
-                )}
-                <div className="flex justify-between items-center mt-5 pt-4 border-t border-gray-200/50 dark:border-white/10">
-                  <Link
-                    to={`/deck/${deck.id}`}
-                    className="text-brand-500 hover:text-brand-600 font-medium text-sm transition-colors"
-                  >
-                    View Deck →
-                  </Link>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => handleEditDeck(deck)}
-                      className="text-gray-500 dark:text-gray-400 hover:text-brand-500 dark:hover:text-brand-400 font-medium text-sm transition-colors"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteDeck(deck.id)}
-                      className="text-red-400 hover:text-red-500 font-medium text-sm transition-colors"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
+          <>
+            {/* Search Option */}
+            <div className="mb-6 max-w-md relative animate-fade-in">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
-            ))}
-          </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search decks by name or description..."
+                className="input-field pl-10 pr-10 py-2.5 text-sm w-full"
+                aria-label="Search decks"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                  title="Clear search"
+                  aria-label="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {searchQuery && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 -mt-2">
+                Showing {filteredDecks.length} of {decks.length} {decks.length === 1 ? 'deck' : 'decks'}
+              </p>
+            )}
+
+            {filteredDecks.length === 0 ? (
+              <div className="text-center py-16 glass-elevated rounded-2xl animate-fade-in">
+                <div className="text-4xl mb-4">🔍</div>
+                <p className="text-gray-700 dark:text-gray-200 font-semibold text-lg mb-1">
+                  No decks found matching "{searchQuery}"
+                </p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
+                  Try checking for typos or searching for a different keyword.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="text-brand-500 hover:text-brand-600 font-medium text-sm transition-colors"
+                >
+                  Clear search
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {filteredDecks.map((deck) => (
+                  <div
+                    key={deck.id}
+                    className="glass-elevated rounded-2xl p-6 hover:scale-[1.02] transition-all duration-200 animate-slide-up"
+                  >
+                    <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">{deck.name}</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm">{deck.description || 'No description'}</p>
+                    {loadingCards ? (
+                      <p className="text-gray-400 dark:text-gray-500 text-sm">Loading cards...</p>
+                    ) : (
+                      <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">
+                        {cardCounts[deck.id] || 0} {cardCounts[deck.id] === 1 ? 'card' : 'cards'}
+                      </p>
+                    )}
+                    <div className="flex justify-between items-center mt-5 pt-4 border-t border-gray-200/50 dark:border-white/10">
+                      <Link
+                        to={`/deck/${deck.id}`}
+                        className="text-brand-500 hover:text-brand-600 font-medium text-sm transition-colors"
+                      >
+                        View Deck →
+                      </Link>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleEditDeck(deck)}
+                          className="text-gray-500 dark:text-gray-400 hover:text-brand-500 dark:hover:text-brand-400 font-medium text-sm transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDeck(deck.id)}
+                          className="text-red-400 hover:text-red-500 font-medium text-sm transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
