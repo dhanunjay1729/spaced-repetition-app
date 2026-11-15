@@ -101,10 +101,11 @@ export const saveCard = async (cardData) => {
     
     const userId = getCurrentUserId();
     
-    // Ensure metadata and order are included if present
+    // Ensure metadata, questionImage, and order are included if present
     const dataToSave = {
       ...cardData,
       userId,
+      questionImage: cardData.questionImage || null,
       order: cardData.order !== undefined ? cardData.order : 0,
       metadata: cardData.metadata || {},
       createdAt: new Date().toISOString()

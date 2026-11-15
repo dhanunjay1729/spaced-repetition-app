@@ -28,10 +28,17 @@ const Card = ({ card, onDelete }) => {
           isFlipped ? 'bg-green-500' : 'bg-blue-500'
         }`}
       >
-        <div className="text-center w-full">
+        <div className="text-center w-full px-4">
           <p className="text-gray-100 text-sm mb-4">
             {isFlipped ? 'Answer' : 'Question'}
           </p>
+          {!isFlipped && card.questionImage && (
+            <img
+              src={card.questionImage}
+              alt="Question"
+              className="max-h-36 max-w-full rounded-lg object-contain mx-auto mb-3 shadow"
+            />
+          )}
           <p className="text-2xl font-semibold text-white break-words">
             {isFlipped ? card.answer : card.question}
           </p>

@@ -1,16 +1,25 @@
 import React, { useState, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import aiService from '../utils/aiService';
+import { compressImage } from '../utils/imageUtils';
 
 const MAX_QUESTION_LENGTH = 1000;
 
 const CardForm = ({ onSubmit, onCancel, initialData }) => {
-  const [formData, setFormData] = useState(initialData || { question: '', answer: '' });
+  const [formData, setFormData] = useState({
+    question: initialData?.question || '',
+    answer: initialData?.answer || '',
+    questionImage: initialData?.questionImage || null,
+  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [showImageUrlInput, setShowImageUrlInput] = useState(false);
+  const [imageUrlValue, setImageUrlValue] = useState('');
   const [aiGenerated, setAiGenerated] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const savingRef = useRef(false);
+  const questionFileInputRef = useRef(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -77,9 +86,68 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
     }
   };
 
+  const handleQuestionImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessingImage(true);
+    try {
+      const compressedDataUrl = await compressImage(file);
+      setFormData(prev => ({ ...prev, questionImage: compressedDataUrl }));
+      toast.success('Image added to question!');
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || 'Failed to process image');
+    } finally {
+      setIsProcessingImage(false);
+      if (questionFileInputRef.current) {
+        questionFileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleApplyImageUrl = (e) => {
+    e.preventDefault();
+    const url = imageUrlValue.trim();
+    if (!url) return;
+    setFormData(prev => ({ ...prev, questionImage: url }));
+    setImageUrlValue('');
+    setShowImageUrlInput(false);
+    toast.success('Image URL added!');
+  };
+
+  const handleRemoveQuestionImage = () => {
+    setFormData(prev => ({ ...prev, questionImage: null }));
+    toast('Image removed');
+  };
+
+  const handleQuestionPaste = async (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          e.preventDefault();
+          setIsProcessingImage(true);
+          try {
+            const compressed = await compressImage(file);
+            setFormData(prev => ({ ...prev, questionImage: compressed }));
+            toast.success('Image pasted into question!');
+          } catch {
+            toast.error('Failed to paste image');
+          } finally {
+            setIsProcessingImage(false);
+          }
+          break;
+        }
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (savingRef.current || isGenerating || isExtracting) return;
+    if (savingRef.current || isGenerating || isExtracting || isProcessingImage) return;
 
     if (formData.question.trim().length === 0) {
       return toast.error('Question is required');
@@ -94,6 +162,8 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
       const nextReview = initialData?.nextReview || new Date().toISOString();
       await onSubmit({
         ...formData,
+        ...(initialData?.id ? { id: initialData.id } : {}),
+        questionImage: formData.questionImage || null,
         nextReview,
         metadata: {
           ...initialData?.metadata,
@@ -120,8 +190,9 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
             name="question"
             value={formData.question}
             onChange={handleChange}
+            onPaste={handleQuestionPaste}
             className="flex-1 input-field"
-            placeholder="Enter a word or question"
+            placeholder="Enter a word or question (or paste an image with Ctrl+V)"
             required
             maxLength={MAX_QUESTION_LENGTH}
           />
@@ -134,6 +205,75 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
             {isGenerating ? 'Generating...' : '✨ AI Generate'}
           </button>
         </div>
+
+        {/* Question Image Attachment Controls */}
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <input
+            type="file"
+            ref={questionFileInputRef}
+            accept="image/*"
+            onChange={handleQuestionImageUpload}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => questionFileInputRef.current?.click()}
+            disabled={isProcessingImage}
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors"
+          >
+            📷 {isProcessingImage ? 'Processing...' : 'Attach Image'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowImageUrlInput(!showImageUrlInput)}
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-colors"
+          >
+            🔗 {showImageUrlInput ? 'Hide URL input' : 'Image URL'}
+          </button>
+        </div>
+
+        {/* Optional Image URL Input Field */}
+        {showImageUrlInput && (
+          <div className="mt-2 flex gap-2 animate-fade-in">
+            <input
+              type="url"
+              value={imageUrlValue}
+              onChange={(e) => setImageUrlValue(e.target.value)}
+              placeholder="Paste image URL (https://...)"
+              className="input-field text-xs py-1.5 flex-1"
+            />
+            <button
+              type="button"
+              onClick={handleApplyImageUrl}
+              className="btn-primary text-xs py-1.5 px-3"
+            >
+              Add URL
+            </button>
+          </div>
+        )}
+
+        {/* Question Image Preview */}
+        {formData.questionImage && (
+          <div className="mt-3 relative inline-block group animate-fade-in">
+            <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 mb-1">Question Image Attached:</p>
+            <div className="relative inline-block border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 p-1">
+              <img
+                src={formData.questionImage}
+                alt="Question attachment preview"
+                className="max-h-36 max-w-xs object-contain rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={handleRemoveQuestionImage}
+                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-lg transition-transform hover:scale-110"
+                title="Remove image"
+                aria-label="Remove question image"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div>

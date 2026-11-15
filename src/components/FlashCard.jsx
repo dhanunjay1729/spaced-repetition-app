@@ -98,7 +98,16 @@ const Flashcard = ({ card, onRate, saving = false }) => {
                   </span>
                 </div>
               )}
-              <h3 className="text-gray-400 dark:text-gray-500 text-sm uppercase tracking-wide mb-4 text-center font-medium">Question</h3>
+              <h3 className="text-gray-400 dark:text-gray-500 text-sm uppercase tracking-wide mb-2 text-center font-medium">Question</h3>
+              {card.questionImage && (
+                <div className="my-2 flex justify-center max-h-40 sm:max-h-48 overflow-hidden">
+                  <img
+                    src={card.questionImage}
+                    alt="Question attachment"
+                    className="max-h-40 sm:max-h-48 max-w-full object-contain rounded-xl border border-gray-200/50 dark:border-white/10 shadow-sm"
+                  />
+                </div>
+              )}
               <div className="text-base sm:text-lg md:text-xl text-gray-800 dark:text-gray-100 text-center flex-grow flex items-center justify-center">
                 <div className="w-full">{formatQuestion(card.question)}</div>
               </div>

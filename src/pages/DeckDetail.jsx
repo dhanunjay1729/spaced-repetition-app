@@ -325,15 +325,25 @@ const DeckDetail = () => {
                   </span>
 
                   {/* Question / Answer preview */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-800 dark:text-white text-sm truncate">
-                      {card.question}
-                    </p>
-                    {!isExpanded && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                        {card.answer}
-                      </p>
+                  <div className="flex-1 min-w-0 flex items-center gap-3">
+                    {card.questionImage && (
+                      <img
+                        src={card.questionImage}
+                        alt="Question attachment preview"
+                        className="w-8 h-8 rounded-lg object-cover border border-gray-200 dark:border-white/10 shrink-0"
+                        title="Contains question image"
+                      />
                     )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-gray-800 dark:text-white text-sm truncate">
+                        {card.question}
+                      </p>
+                      {!isExpanded && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                          {card.answer}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Due indicator */}
@@ -392,8 +402,22 @@ const DeckDetail = () => {
                 {/* Expanded panel: answer + forgetting curve */}
                 {isExpanded && (
                   <div className="px-5 pb-5 border-t border-gray-100 dark:border-white/5 animate-fade-in space-y-4">
+                    {/* Question Image if present */}
+                    {card.questionImage && (
+                      <div className="pt-4">
+                        <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1.5">Question Image</p>
+                        <div className="inline-block border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 p-1">
+                          <img
+                            src={card.questionImage}
+                            alt="Question attachment"
+                            className="max-h-64 max-w-full rounded-lg object-contain"
+                          />
+                        </div>
+                      </div>
+                    )}
+
                     {/* Answer */}
-                    <div className="pt-4">
+                    <div className="pt-2">
                       <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Answer</p>
                       <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">{card.answer}</p>
                     </div>

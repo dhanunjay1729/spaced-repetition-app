@@ -25,6 +25,7 @@ export const createCard = (data) => {
     deckId: data.deckId,
     question: data.question || '',
     answer: data.answer || '',
+    questionImage: data.questionImage || null,
     order: data.order !== undefined ? data.order : 0,
     metadata: data.metadata || {},
     // FSRS-6 memory state fields
