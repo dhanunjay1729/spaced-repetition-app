@@ -109,7 +109,7 @@ const Flashcard = ({ card, onRate, saving = false }) => {
                 </div>
               )}
               <div className="text-base sm:text-lg md:text-xl text-gray-800 dark:text-gray-100 text-center flex-grow flex items-center justify-center">
-                <div className="w-full">{formatQuestion(card.question)}</div>
+                <div className="w-full whitespace-pre-wrap break-words">{formatQuestion(card.question)}</div>
               </div>
               {!isFlipped && (
                 <div className="mt-6 flex flex-col items-center gap-3">

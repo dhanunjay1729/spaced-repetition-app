@@ -402,9 +402,17 @@ const DeckDetail = () => {
                 {/* Expanded panel: answer + forgetting curve */}
                 {isExpanded && (
                   <div className="px-5 pb-5 border-t border-gray-100 dark:border-white/5 animate-fade-in space-y-4">
+                    {/* Full Question (multiline support) */}
+                    <div className="pt-3">
+                      <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Full Question</p>
+                      <p className="text-gray-800 dark:text-gray-100 text-sm leading-relaxed whitespace-pre-wrap font-medium">
+                        {card.question}
+                      </p>
+                    </div>
+
                     {/* Question Image if present */}
                     {card.questionImage && (
-                      <div className="pt-4">
+                      <div>
                         <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1.5">Question Image</p>
                         <div className="inline-block border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden bg-black/5 dark:bg-white/5 p-1">
                           <img
@@ -419,7 +427,7 @@ const DeckDetail = () => {
                     {/* Answer */}
                     <div className="pt-2">
                       <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Answer</p>
-                      <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">{card.answer}</p>
+                      <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed whitespace-pre-wrap">{card.answer}</p>
                     </div>
 
                     {/* FSRS stats row */}

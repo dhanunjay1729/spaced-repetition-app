@@ -183,28 +183,28 @@ ${result.output.etymology ? `Etymology: ${result.output.etymology}` : ''}
     <form onSubmit={handleSubmit} className="glass-elevated rounded-2xl p-6" aria-busy={isSaving}>
       <fieldset disabled={isSaving} className="space-y-4">
       <div>
-        <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200 text-sm">Question</label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            name="question"
-            value={formData.question}
-            onChange={handleChange}
-            onPaste={handleQuestionPaste}
-            className="flex-1 input-field"
-            placeholder="Enter a word or question (or paste an image with Ctrl+V)"
-            required
-            maxLength={MAX_QUESTION_LENGTH}
-          />
+        <div className="flex justify-between items-center mb-1">
+          <label className="font-medium text-gray-700 dark:text-gray-200 text-sm">Question</label>
           <button
             type="button"
             onClick={handleAIGenerate}
             disabled={isGenerating}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-brand-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-brand-600 disabled:opacity-50 transition-all active:scale-[0.97] text-sm whitespace-nowrap"
+            className="px-3 py-1 bg-gradient-to-r from-purple-500 to-brand-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-brand-600 disabled:opacity-50 transition-all active:scale-[0.97] text-xs whitespace-nowrap"
           >
             {isGenerating ? 'Generating...' : '✨ AI Generate'}
           </button>
         </div>
+        <textarea
+          name="question"
+          value={formData.question}
+          onChange={handleChange}
+          onPaste={handleQuestionPaste}
+          rows={3}
+          className="w-full input-field min-h-[90px] resize-y"
+          placeholder="Enter your question (press Enter for a new line, or paste an image with Ctrl+V)..."
+          required
+          maxLength={MAX_QUESTION_LENGTH}
+        />
 
         {/* Question Image Attachment Controls */}
         <div className="mt-2 flex flex-wrap items-center gap-2">

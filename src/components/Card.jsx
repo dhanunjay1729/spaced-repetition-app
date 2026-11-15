@@ -39,7 +39,7 @@ const Card = ({ card, onDelete }) => {
               className="max-h-36 max-w-full rounded-lg object-contain mx-auto mb-3 shadow"
             />
           )}
-          <p className="text-2xl font-semibold text-white break-words">
+          <p className="text-2xl font-semibold text-white break-words whitespace-pre-wrap">
             {isFlipped ? card.answer : card.question}
           </p>
         </div>
